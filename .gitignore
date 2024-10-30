@@ -1,0 +1,4 @@
+.clang-format
+.clangd
+Risc-V-Simulator.project
+Risc-V-Simulator.mk
