@@ -21,4 +21,6 @@ bool pretty_print(state s);
 
 bool is_adress_initialised(state s, int64_t adress);
 
-bool is_register_initialised(state s, int8_t)
+bool is_register_initialised(state s, int8_t);
+
+state create_new_state();
