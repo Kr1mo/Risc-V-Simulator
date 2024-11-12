@@ -15,7 +15,7 @@ compile: risc_v_sim
 risc_v_sim: risc_v_sim.o state.o processor.o
 	gcc $(CFLAGS) risc_v_sim.o state.o processor.o -o risc_v_sim
 
-risc_v_sim.o: risc_v_sim.c state.h  processor.h
+risc_v_sim.o: risc_v_sim.c state.h processor.h
 	gcc $(CFLAGS) -c risc_v_sim.c -o risc_v_sim.o
 
 state.o: state.c state.h

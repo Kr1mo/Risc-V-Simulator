@@ -14,7 +14,7 @@ typedef struct state
     bool regs_init[32];
 
     //TODO: Hashing
-    int64_t memory_values[MEMORY_SIZE];
+    int8_t memory_values[MEMORY_SIZE];
     bool memory_init[MEMORY_SIZE];
 
 }state;
