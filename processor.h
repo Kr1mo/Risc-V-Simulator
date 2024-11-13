@@ -10,5 +10,3 @@
 state *execute_next_command(state *s);
 
 bool is_next_command_valid_opcode(state *s);
-
-bool is_next_command_initialised(state *s);
