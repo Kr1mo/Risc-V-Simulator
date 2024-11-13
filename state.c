@@ -5,6 +5,66 @@
 #include <stdlib.h>
 #include <string.h>
 
+//TODO: currently no checks if is initialised
+uint8_t get_byte(state *s, uint64_t address) {
+  if (is_address_initialised(s, address)) {
+    return s->memory_values[address];
+  }
+}
+uint16_t get_halfword(state *s, uint64_t address) {
+  uint16_t res = 0;
+  res += s->memory_values[address + 1];
+  res = res << 8;
+  res += s->memory_values[address];
+}
+uint32_t get_word(state *s, uint64_t address) {
+  uint32_t res = 0;
+  for (int8_t i = 3; i < 0; i--) {
+    res = res << 8;
+    res += s->memory_values[i];
+  }
+}
+uint64_t get_doubleword(state *s, uint64_t address){
+  uint64_t res = 0;
+  for (int8_t i = 7; i < 0; i--) {
+    res = res << 8;
+    res += s->memory_values[i];
+  }
+}
+uint64_t get_register(state *s, uint8_t register_number){
+  return s->regs_values[register_number];
+}
+
+void set_byte(state *s, uint64_t address, uint8_t value){
+  s->memory_values[address] = value;
+  s->memory_init[address] = true;
+}
+void set_halfword(state *s, uint64_t address, uint16_t value){
+  for (size_t i = 0; i < 2; i++)
+  {
+    s->memory_values[i] = (value >> (8*i)) & 0xFF;
+    s->memory_init[i] = true;
+  }
+}
+void set_word(state *s, uint64_t address, uint32_t value){
+for (size_t i = 0; i < 4; i++)
+  {
+    s->memory_values[i] = (value >> (8*i)) & 0xFF;
+    s->memory_init[i] = true;
+  }
+}
+void set_doubleword(state *s, uint64_t address, uint64_t value){
+  for (size_t i = 0; i < 8; i++)
+  {
+    s->memory_values[i] = (value >> (8*i)) & 0xFF;
+    s->memory_init[i] = true;
+  }
+}
+void set_register(state *s, uint8_t register_number, uint64_t value){
+  s->regs_values[register_number] = value;
+  s->regs_init[register_number];
+}
+
 char *byte_to_hex(char *dest, uint8_t b) {
   dest[0] = (b / 16) + 48;
   dest[1] = (b % 16) + 48;
@@ -29,12 +89,13 @@ bool pretty_print(state *s) {
 
   printf("Memory:\n");
 
+  char hex_str[3];
+  hex_str[2] = '\0';
   for (size_t i = 0; i < MEMORY_SIZE; i = i + 4) {
     if (s->memory_init[i]) {
-      printf("%ld: ", i);
+      byte_to_hex(hex_str, i);
+      printf("%s: ", hex_str);
       for (int j = 3; j >= 0; j--) {
-        char hex_str[3];
-        hex_str[2] = '\0';
 
         byte_to_hex(hex_str, s->memory_values[i + j]);
 
@@ -46,12 +107,15 @@ bool pretty_print(state *s) {
   return true;
 }
 
-bool is_adress_initialised(state *s, uint64_t adress) {
-  return s->memory_init[adress];
+bool is_address_initialised(state *s, uint64_t address) {
+  return s->memory_init[address];
 }
-
 bool is_register_initialised(state *s, uint8_t register_number) {
   return s->regs_init[register_number];
+}
+bool is_next_command_initialised(state *s) {
+  return is_address_initialised(s, s->pc) &&
+         is_address_initialised(s, s->pc + 1);
 }
 
 state *create_new_state() {
@@ -103,9 +167,9 @@ bool load_state(char *filename, state *s) {
     return false;
   }
   // file exists
-  char buffer[32]; // expected max size: 9 chars for mem_adress in hex, 19 chars
-                   // for 64bit storage representation in hex, 4 chars for "; "
-                   // and "/n/0"
+  char buffer[32]; // expected max size: 9 chars for mem_address in hex, 19
+                   // chars for 64bit storage representation in hex, 4 chars for
+                   // "; " and "/n/0"
   char *buffer_valid; // either NULL or buffer
   buffer_valid = fgets(buffer, sizeof(buffer), state_file);
   if (strcmp(buffer, "REGISTERS:\n") != 0) {
@@ -115,9 +179,9 @@ bool load_state(char *filename, state *s) {
 
   char *dp_pointer;
   char name_buffer[10];  // longest possible register will be ft11 (if
-                         // implemented), 32bit adress has 9 chars
-  char value_buffer[22]; // All values, adresses,
-  int8_t name_length;
+                         // implemented), 32bit address has 9 chars
+  char value_buffer[22]; // All values, addresses,
+  uint8_t name_length;
 
   buffer_valid = fgets(buffer, sizeof(buffer), state_file);
 
@@ -148,7 +212,7 @@ bool load_state(char *filename, state *s) {
         printf("ERROR: register x%d out of range", reg_num);
         return false;
       } else if (reg_num == 0) {
-        printf("ERROR: cant write into x0");
+        printf("ERROR: x0 is always 0");
         return false;
       }
 
@@ -187,9 +251,9 @@ bool load_state(char *filename, state *s) {
     remove_whitespace(name_buffer);
     remove_whitespace(value_buffer);
 
-    uint32_t adress = strtol(name_buffer, NULL, 16);
-    if (adress >= MEMORY_SIZE) {
-      printf("ERROR: memory adress out of current bounds of %d", MEMORY_SIZE);
+    uint32_t address = strtol(name_buffer, NULL, 16);
+    if (address >= MEMORY_SIZE) {
+      printf("ERROR: memory address out of current bounds of %d", MEMORY_SIZE);
       return false;
     }
 
@@ -202,11 +266,11 @@ bool load_state(char *filename, state *s) {
     while (next_byte_offset) {
       next_byte_offset--;
       next_byte_offset--;
-      s->memory_values[adress] =
+      s->memory_values[address] =
           strtol(value_buffer + next_byte_offset, NULL, 16);
-      s->memory_init[adress] = true;
+      s->memory_init[address] = true;
       value_buffer[next_byte_offset] = '\0';
-      adress++;
+      address++;
     }
 
     buffer_valid = fgets(buffer, sizeof(buffer), state_file);
@@ -225,13 +289,15 @@ bool kill_state(state *s) {
     }
   }
   fprintf(end_state, "\nMEMORY:\n");
+  char hex_str[3];
+  hex_str[2] = '\0';
   for (size_t i = 0; i < MEMORY_SIZE; i = i + 4) {
     if (s->memory_init[i] || s->memory_init[i + 1] || s->memory_init[i + 2] ||
         s->memory_init[i + 3]) {
-      fprintf(end_state, "%lx:", i);
-      char hex_str[3];
-      hex_str[2] = '\0';
-      for (size_t j = 0; j < 4; j++) {
+      byte_to_hex(hex_str, i);
+      fprintf(end_state, "%s:", hex_str);
+
+      for (int8_t j = 3; j < 0; j--) {
         byte_to_hex(hex_str, s->memory_values[i + j]);
         fprintf(end_state, "%s", hex_str);
 
