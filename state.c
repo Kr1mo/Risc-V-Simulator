@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-char *byte_to_hex(char *dest, int8_t b) {
+char *byte_to_hex(char *dest, uint8_t b) {
   dest[0] = (b / 16) + 48;
   dest[1] = (b % 16) + 48;
 
@@ -114,8 +114,8 @@ bool load_state(char *filename, state *s) {
   }
 
   char *dp_pointer;
-  char name_buffer[10]; // longest possible register will be ft11 (if
-                        // implemented), 32bit adress has 9 chars
+  char name_buffer[10];  // longest possible register will be ft11 (if
+                         // implemented), 32bit adress has 9 chars
   char value_buffer[22]; // All values, adresses,
   int8_t name_length;
 
@@ -160,9 +160,6 @@ bool load_state(char *filename, state *s) {
       printf("ERROR: register name %s unknown", name_buffer);
       break;
     }
-
-    printf("Register %s steht auf %s\n", name_buffer,
-           value_buffer); // TODO remove
     buffer_valid = fgets(buffer, sizeof(buffer), state_file);
   }
 
@@ -209,8 +206,6 @@ bool load_state(char *filename, state *s) {
           strtol(value_buffer + next_byte_offset, NULL, 16);
       s->memory_init[adress] = true;
       value_buffer[next_byte_offset] = '\0';
-      printf("Adresse %d steht auf %d\n", adress,
-             s->memory_values[adress]); // TODO remove
       adress++;
     }
 
