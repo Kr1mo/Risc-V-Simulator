@@ -5,65 +5,67 @@
 #include <stdlib.h>
 #include <string.h>
 
-//TODO: currently no checks if is initialised
-uint8_t get_byte(state *s, uint64_t address) {
-  if (is_address_initialised(s, address)) {
-    return s->memory_values[address];
-  }
+#define BUFFER_SIZE 32
+
+// TODO: currently no checks if is initialised
+uint8_t get_byte(state *s, uint64_t address) {return s->memory_values[address];
 }
 uint16_t get_halfword(state *s, uint64_t address) {
   uint16_t res = 0;
   res += s->memory_values[address + 1];
   res = res << 8;
   res += s->memory_values[address];
+  return res;
 }
 uint32_t get_word(state *s, uint64_t address) {
   uint32_t res = 0;
-  for (int8_t i = 3; i < 0; i--) {
+  for (int8_t i = 3; i >= 0; i--) {
     res = res << 8;
     res += s->memory_values[i];
   }
+  return res;
 }
-uint64_t get_doubleword(state *s, uint64_t address){
+uint64_t get_doubleword(state *s, uint64_t address) {
   uint64_t res = 0;
-  for (int8_t i = 7; i < 0; i--) {
+  for (int8_t i = 7; i >= 0; i--) {
     res = res << 8;
     res += s->memory_values[i];
   }
+  return res;
 }
-uint64_t get_register(state *s, uint8_t register_number){
+uint64_t get_register(state *s, uint8_t register_number) {
   return s->regs_values[register_number];
 }
+uint32_t get_next_command(state *s) { return get_word(s, s->pc); }
 
-void set_byte(state *s, uint64_t address, uint8_t value){
+void set_byte(state *s, uint64_t address, uint8_t value) {
   s->memory_values[address] = value;
   s->memory_init[address] = true;
 }
-void set_halfword(state *s, uint64_t address, uint16_t value){
-  for (size_t i = 0; i < 2; i++)
-  {
-    s->memory_values[i] = (value >> (8*i)) & 0xFF;
+void set_halfword(state *s, uint64_t address, uint16_t value) {
+  for (size_t i = 0; i < 2; i++) {
+    s->memory_values[i] = (value >> (8 * i)) & 0xFF;
     s->memory_init[i] = true;
   }
 }
-void set_word(state *s, uint64_t address, uint32_t value){
-for (size_t i = 0; i < 4; i++)
-  {
-    s->memory_values[i] = (value >> (8*i)) & 0xFF;
+void set_word(state *s, uint64_t address, uint32_t value) {
+  for (size_t i = 0; i < 4; i++) {
+    s->memory_values[i] = (value >> (8 * i)) & 0xFF;
     s->memory_init[i] = true;
   }
 }
-void set_doubleword(state *s, uint64_t address, uint64_t value){
-  for (size_t i = 0; i < 8; i++)
-  {
-    s->memory_values[i] = (value >> (8*i)) & 0xFF;
+void set_doubleword(state *s, uint64_t address, uint64_t value) {
+  for (size_t i = 0; i < 8; i++) {
+    s->memory_values[i] = (value >> (8 * i)) & 0xFF;
     s->memory_init[i] = true;
   }
 }
-void set_register(state *s, uint8_t register_number, uint64_t value){
+void set_register(state *s, uint8_t register_number, uint64_t value) {
   s->regs_values[register_number] = value;
-  s->regs_init[register_number];
+  s->regs_init[register_number]=true;
 }
+void set_pc(state *s, uint64_t value) { s->pc = value; }
+void next_pc(state *s) { s->pc += 4; }
 
 char *byte_to_hex(char *dest, uint8_t b) {
   dest[0] = (b / 16) + 48;
@@ -115,7 +117,9 @@ bool is_register_initialised(state *s, uint8_t register_number) {
 }
 bool is_next_command_initialised(state *s) {
   return is_address_initialised(s, s->pc) &&
-         is_address_initialised(s, s->pc + 1);
+         is_address_initialised(s, s->pc + 1) &&
+         is_address_initialised(s, s->pc + 2) &&
+         is_address_initialised(s, s->pc + 3);
 }
 
 state *create_new_state() {
@@ -160,6 +164,16 @@ void remove_whitespace(char *str) {
       '\0'; // terminate string and cut off maybe left non moved chars
 }
 
+void remove_comment(char*str){
+  for (size_t i = 0; i < BUFFER_SIZE; i++)
+  {
+    if (str[i] == '#')
+    {
+      str[i] = '\0';
+    }
+  }
+}
+
 bool load_state(char *filename, state *s) {
   FILE *state_file = fopen(filename, "r");
   if (!state_file) {
@@ -167,7 +181,7 @@ bool load_state(char *filename, state *s) {
     return false;
   }
   // file exists
-  char buffer[32]; // expected max size: 9 chars for mem_address in hex, 19
+  char buffer[BUFFER_SIZE]; // expected max size: 9 chars for mem_address in hex, 19
                    // chars for 64bit storage representation in hex, 4 chars for
                    // "; " and "/n/0"
   char *buffer_valid; // either NULL or buffer
@@ -179,16 +193,18 @@ bool load_state(char *filename, state *s) {
 
   char *dp_pointer;
   char name_buffer[10];  // longest possible register will be ft11 (if
-                         // implemented), 32bit address has 9 chars
+                         // implemented), 32bit address has 9 chars (2x4 hexcode + ' ')
   char value_buffer[22]; // All values, addresses,
   uint8_t name_length;
 
   buffer_valid = fgets(buffer, sizeof(buffer), state_file);
+  remove_comment(buffer);
 
   while (buffer_valid && strncmp(buffer, "\n", 1)) {
     dp_pointer = strchr(buffer, ':');
     if (!dp_pointer) {
       buffer_valid = fgets(buffer, sizeof(buffer), state_file);
+      remove_comment(buffer);
       continue;
     }
 
@@ -225,20 +241,24 @@ bool load_state(char *filename, state *s) {
       break;
     }
     buffer_valid = fgets(buffer, sizeof(buffer), state_file);
+    remove_comment(buffer);
   }
 
   buffer_valid = fgets(buffer, sizeof(buffer), state_file);
+  remove_comment(buffer);
   if (strcmp(buffer, "MEMORY:\n") != 0) {
     printf("ERROR: state-file does not include MEMORY:");
     return false;
   }
 
   buffer_valid = fgets(buffer, sizeof(buffer), state_file);
+  remove_comment(buffer);
 
   while (buffer_valid && strncmp(buffer, "\n", 1)) {
     dp_pointer = strchr(buffer, ':');
     if (!dp_pointer) {
       buffer_valid = fgets(buffer, sizeof(buffer), state_file);
+      remove_comment(buffer);
       continue;
     }
 
@@ -274,6 +294,7 @@ bool load_state(char *filename, state *s) {
     }
 
     buffer_valid = fgets(buffer, sizeof(buffer), state_file);
+    remove_comment(buffer);
   }
 
   return true;

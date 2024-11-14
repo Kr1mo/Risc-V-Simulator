@@ -1,9 +1,10 @@
 REGISTERS:
-PC:0000 0000 0000 0001
-x1:0000 0000 0000 0002
-x2:0000 0000 0000 0003
-x3:0000 0000 0000 0004
+PC:0000 0000 0000 0000 # this is a comment wich is extra long so I can test if overly long comments will confuse my parser
+x1:0000 0000 0000 0003
+x2:0000 0000 0000 0002
+x3:0000 0000 0000 0001
 
 MEMORY:
-0000 0000:0020 8033
+0000 0010:ffff fffe #random test
+0000 0000:0020 81b3 #add x1 x2 x3
 0000 0008:0000 0003 abcd ef99

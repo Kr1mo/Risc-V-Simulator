@@ -5,8 +5,8 @@
       3 /*Load*/, 35 /*Store*/, 19 /*Math-I*/, 51 /*Math*/, 15 /*FENCE*/,      \
       115 /*???*/
 #define OP_CODES_RV64I                                                         \
-  { 27 /*Math-I-W*/, 59 /*Math-W*/ } // only what isnt already in RV32I
-
-state *execute_next_command(state *s);
+  27 /*Math-I-W*/, 59 /*Math-W*/ // only what isnt already in RV32I
 
 bool is_next_command_valid_opcode(state *s);
+
+void execute_next_command(state *s);

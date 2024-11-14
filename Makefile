@@ -2,7 +2,7 @@ CFLAGS= -fsanitize=address -g -Wall
 .PHONY: clean checkstyle format debug
 
 clean: 
-	rm -f *.o risc_v_sim
+	rm -f *.o risc_v_sim end.state
 
 checkstyle: 
 	clang-tidy $(wildcard *.c) $(wildcard *.h)
