@@ -1,10 +1,11 @@
 REGISTERS:
-PC:0000 0000 0000 0000 # this is a comment wich is extra long so I can test if overly long comments will confuse my parser
-x1:0000 0000 0000 0003
-x2:0000 0000 0000 0002
+PC:0000 0000 0000 0008 #test for long comments, this is a comment wich is extra long so I can test if overly long comments will confuse my parser
+x1:ffff ffff ffff fffd #NO DOUBLEQUOTES IN COMMENTS ! (maybe TODO)
+x2:0000 0000 0000 003f
 x3:0000 0000 0000 0001
 
-MEMORY:
-0000 0010:ffff fffe #random test
-0000 0000:0020 81b3 #add x1 x2 x3
-0000 0008:0000 0003 abcd ef99
+MEMORY:             #cmd rd rs1 rs2
+0000 0000:0020 81b3 #add x3 x1 x2
+0000 0004:0020 d1b3 #srl x3 x1 x2
+0000 0008:4020 d1b3 #sra x3 x1 x2
+0000 003c:0123456789abcdef #test for 64bit input and different spaces

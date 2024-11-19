@@ -5,10 +5,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define BUFFER_SIZE 32
+#define LOAD_BUFFER_SIZE 32
 
 // TODO: currently no checks if is initialised
-uint8_t get_byte(state *s, uint64_t address) {return s->memory_values[address];
+uint8_t get_byte(state *s, uint64_t address) {
+  return s->memory_values[address];
 }
 uint16_t get_halfword(state *s, uint64_t address) {
   uint16_t res = 0;
@@ -21,7 +22,7 @@ uint32_t get_word(state *s, uint64_t address) {
   uint32_t res = 0;
   for (int8_t i = 3; i >= 0; i--) {
     res = res << 8;
-    res += s->memory_values[i];
+    res += s->memory_values[i + address];
   }
   return res;
 }
@@ -29,7 +30,7 @@ uint64_t get_doubleword(state *s, uint64_t address) {
   uint64_t res = 0;
   for (int8_t i = 7; i >= 0; i--) {
     res = res << 8;
-    res += s->memory_values[i];
+    res += s->memory_values[i + address];
   }
   return res;
 }
@@ -62,7 +63,7 @@ void set_doubleword(state *s, uint64_t address, uint64_t value) {
 }
 void set_register(state *s, uint8_t register_number, uint64_t value) {
   s->regs_values[register_number] = value;
-  s->regs_init[register_number]=true;
+  s->regs_init[register_number] = true;
 }
 void set_pc(state *s, uint64_t value) { s->pc = value; }
 void next_pc(state *s) { s->pc += 4; }
@@ -85,7 +86,8 @@ bool pretty_print(state *s) {
   printf("PC:%ld\n", s->pc);
   for (size_t i = 0; i < 32; i++) {
     if (s->regs_init[i]) {
-      printf("x%ld:%ld\n", i, s->regs_values[i]);
+      int64_t value_signed = s->regs_values[i];
+      printf("x%ld:%ld\n", i, value_signed);
     }
   }
 
@@ -164,11 +166,9 @@ void remove_whitespace(char *str) {
       '\0'; // terminate string and cut off maybe left non moved chars
 }
 
-void remove_comment(char*str){
-  for (size_t i = 0; i < BUFFER_SIZE; i++)
-  {
-    if (str[i] == '#')
-    {
+void remove_comment(char *str) {
+  for (size_t i = 0; i < LOAD_BUFFER_SIZE; i++) {
+    if (str[i] == '#') {
       str[i] = '\0';
     }
   }
@@ -177,23 +177,25 @@ void remove_comment(char*str){
 bool load_state(char *filename, state *s) {
   FILE *state_file = fopen(filename, "r");
   if (!state_file) {
-    printf("ERROR: No state-file");
+    printf("ERROR: No state-file\n");
     return false;
   }
   // file exists
-  char buffer[BUFFER_SIZE]; // expected max size: 9 chars for mem_address in hex, 19
-                   // chars for 64bit storage representation in hex, 4 chars for
-                   // "; " and "/n/0"
-  char *buffer_valid; // either NULL or buffer
+  char buffer[LOAD_BUFFER_SIZE]; // expected max size: 9 chars for mem_address
+                                 // in hex, 19 chars for 64bit storage
+                                 // representation in hex, 4 chars for
+                                 // "; " and "/n/0"
+  char *buffer_valid;            // either NULL or buffer
   buffer_valid = fgets(buffer, sizeof(buffer), state_file);
   if (strcmp(buffer, "REGISTERS:\n") != 0) {
-    printf("ERROR: state-file not starting with REGISTERS:");
+    printf("ERROR: state-file not starting with 'REGISTERS:'\n");
     return false;
   }
 
   char *dp_pointer;
   char name_buffer[10];  // longest possible register will be ft11 (if
-                         // implemented), 32bit address has 9 chars (2x4 hexcode + ' ')
+                         // implemented), 32bit address has 9 chars (2x4 hexcode
+                         // + ' ')
   char value_buffer[22]; // All values, addresses,
   uint8_t name_length;
 
@@ -219,25 +221,25 @@ bool load_state(char *filename, state *s) {
 
     switch (name_buffer[0]) {
     case 'P':
-      s->pc = strtol(value_buffer, NULL, 16);
+      s->pc = strtoul(value_buffer, NULL, 16);
       break;
 
     case 'x':
       int16_t reg_num = strtol(name_buffer + 1, NULL, 10);
       if (reg_num > 31 || reg_num < 0) {
-        printf("ERROR: register x%d out of range", reg_num);
+        printf("ERROR: register x%d out of range\n", reg_num);
         return false;
       } else if (reg_num == 0) {
-        printf("ERROR: x0 is always 0");
+        printf("ERROR: x0 is always 0\n");
         return false;
       }
 
-      s->regs_values[reg_num] = strtol(value_buffer, NULL, 16);
+      s->regs_values[reg_num] = strtoul(value_buffer, NULL, 16);
       s->regs_init[reg_num] = true;
       break;
 
     default:
-      printf("ERROR: register name %s unknown", name_buffer);
+      printf("ERROR: register name %s unknown\n", name_buffer);
       break;
     }
     buffer_valid = fgets(buffer, sizeof(buffer), state_file);
@@ -246,8 +248,8 @@ bool load_state(char *filename, state *s) {
 
   buffer_valid = fgets(buffer, sizeof(buffer), state_file);
   remove_comment(buffer);
-  if (strcmp(buffer, "MEMORY:\n") != 0) {
-    printf("ERROR: state-file does not include MEMORY:");
+  if (strncmp(buffer, "MEMORY:", 7) != 0) {
+    printf("ERROR: state-file does not include 'MEMORY:'\n");
     return false;
   }
 
@@ -271,15 +273,15 @@ bool load_state(char *filename, state *s) {
     remove_whitespace(name_buffer);
     remove_whitespace(value_buffer);
 
-    uint32_t address = strtol(name_buffer, NULL, 16);
+    uint32_t address = strtoul(name_buffer, NULL, 16);
     if (address >= MEMORY_SIZE) {
-      printf("ERROR: memory address out of current bounds of %d", MEMORY_SIZE);
+      printf("ERROR: memory address out of current bounds of %d\n", MEMORY_SIZE);
       return false;
     }
 
     int8_t next_byte_offset = strlen(value_buffer);
     if (next_byte_offset != 8 && next_byte_offset != 16) {
-      printf("ERROR: Memory allocation neither 32 nor 64 bit");
+      printf("ERROR: Memory allocation neither 32 nor 64 bit\n");
       return false;
     }
 
@@ -287,7 +289,7 @@ bool load_state(char *filename, state *s) {
       next_byte_offset--;
       next_byte_offset--;
       s->memory_values[address] =
-          strtol(value_buffer + next_byte_offset, NULL, 16);
+          strtoul(value_buffer + next_byte_offset, NULL, 16);
       s->memory_init[address] = true;
       value_buffer[next_byte_offset] = '\0';
       address++;
@@ -303,7 +305,7 @@ bool load_state(char *filename, state *s) {
 bool kill_state(state *s) {
   FILE *end_state = fopen("end.state", "w");
   fprintf(end_state, "REGISTERS:\n");
-  fprintf(end_state, "PC:%lx", s->pc);
+  fprintf(end_state, "PC:%lx\n", s->pc);
   for (size_t i = 0; i < 32; i++) {
     if (s->regs_init[i]) {
       fprintf(end_state, "x%ld:%lx\n", i, s->regs_values[i]);
@@ -318,7 +320,7 @@ bool kill_state(state *s) {
       byte_to_hex(hex_str, i);
       fprintf(end_state, "%s:", hex_str);
 
-      for (int8_t j = 3; j < 0; j--) {
+      for (int8_t j = 3; j > 0; j--) {
         byte_to_hex(hex_str, s->memory_values[i + j]);
         fprintf(end_state, "%s", hex_str);
 
