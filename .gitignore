@@ -1,3 +1,4 @@
 *.o
 risc_v_sim
-end.state
+states/*
+!states/test.state

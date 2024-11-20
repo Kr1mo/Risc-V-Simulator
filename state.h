@@ -42,6 +42,6 @@ state *create_new_state();
 
 bool load_state(char *filename, state *s);
 
-bool kill_state(state *s);
+bool kill_state(state *s, char *filename);
 
 #endif // STATE

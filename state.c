@@ -108,6 +108,7 @@ bool pretty_print(state *s) {
       printf("\n");
     }
   }
+  printf("\n\n"); // TODO: maybe remove
   return true;
 }
 
@@ -226,15 +227,16 @@ bool load_state(char *filename, state *s) {
 
     case 'x':
       int16_t reg_num = strtol(name_buffer + 1, NULL, 10);
+      int64_t reg_value = strtoul(value_buffer, NULL, 16);
       if (reg_num > 31 || reg_num < 0) {
         printf("ERROR: register x%d out of range\n", reg_num);
-        return false;
-      } else if (reg_num == 0) {
+        break;
+      } else if (reg_num == 0 && reg_value) { // x0 initialised with not 0
         printf("ERROR: x0 is always 0\n");
-        return false;
+        break;
       }
 
-      s->regs_values[reg_num] = strtoul(value_buffer, NULL, 16);
+      s->regs_values[reg_num] = reg_value;
       s->regs_init[reg_num] = true;
       break;
 
@@ -275,14 +277,17 @@ bool load_state(char *filename, state *s) {
 
     uint32_t address = strtoul(name_buffer, NULL, 16);
     if (address >= MEMORY_SIZE) {
-      printf("ERROR: memory address out of current bounds of %d\n", MEMORY_SIZE);
-      return false;
+      printf("ERROR: memory address %x out of current bounds of %d\n", address,
+             MEMORY_SIZE);
+      continue;
     }
 
     int8_t next_byte_offset = strlen(value_buffer);
     if (next_byte_offset != 8 && next_byte_offset != 16) {
-      printf("ERROR: Memory allocation neither 32 nor 64 bit\n");
-      return false;
+      printf("ERROR: Memory allocation at address %d neither 32 nor 64 bit, "
+             "but %d\n",
+             address, next_byte_offset);
+      continue;
     }
 
     while (next_byte_offset) {
@@ -302,8 +307,8 @@ bool load_state(char *filename, state *s) {
   return true;
 }
 
-bool kill_state(state *s) {
-  FILE *end_state = fopen("end.state", "w");
+bool kill_state(state *s, char *filename) {
+  FILE *end_state = fopen(filename, "w");
   fprintf(end_state, "REGISTERS:\n");
   fprintf(end_state, "PC:%lx\n", s->pc);
   for (size_t i = 0; i < 32; i++) {
@@ -320,11 +325,11 @@ bool kill_state(state *s) {
       byte_to_hex(hex_str, i);
       fprintf(end_state, "%s:", hex_str);
 
-      for (int8_t j = 3; j > 0; j--) {
+      for (int8_t j = 3; j >= 0; j--) {
         byte_to_hex(hex_str, s->memory_values[i + j]);
         fprintf(end_state, "%s", hex_str);
 
-        if (j == 1) {
+        if (j == 2) {
           fprintf(end_state, " ");
         }
       }
