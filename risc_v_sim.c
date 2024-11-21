@@ -69,7 +69,7 @@ int main(int argc, char **argv) {
     execute_next_command(s);
     pretty_print(s);
   } else {
-    printf("ERROR: Next command at %x is not initialised\n");
+    printf("ERROR: Memory at PC is not initialised\n");
   }
 
   if (end_state) {
