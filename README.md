@@ -6,9 +6,9 @@ Given an input state, it shall simulate a processor and return the new state pos
 
 ## Options
 The compiled risc_v_sim takes following arguments:
--e <filename of output> (optional)
+-e < filename of output > (optional)
 
--c <number of cycles of the simulation> (optional) TODO
+-c < number of cycles of the simulation > (optional) TODO
 
 filename of the initial state
 
