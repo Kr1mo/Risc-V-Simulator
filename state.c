@@ -9,10 +9,22 @@
 
 // TODO: currently no checks if is initialised
 uint8_t get_byte(state *s, uint64_t address) {
+  if (!is_address_initialised(s, address)) {
+    printf("ERROR: address %lx is not initialised", address);
+  }
+
   return s->memory_values[address];
 }
 uint16_t get_halfword(state *s, uint64_t address) {
   uint16_t res = 0;
+  if (!is_address_initialised(s, address)) {
+    printf("ERROR: lower byte for halfword at address %lx is not initialised",
+           address);
+  }
+  if (!is_address_initialised(s, address + 1)) {
+    printf("ERROR: higher byte for halfword address %lx is not initialised",
+           address + 1);
+  }
   res += s->memory_values[address + 1];
   res = res << 8;
   res += s->memory_values[address];
@@ -21,6 +33,10 @@ uint16_t get_halfword(state *s, uint64_t address) {
 uint32_t get_word(state *s, uint64_t address) {
   uint32_t res = 0;
   for (int8_t i = 3; i >= 0; i--) {
+    if (!is_address_initialised(s, address + i)) {
+      printf("ERROR: %d. byte of word at address %lx is not initialised", i + 1,
+             address);
+    }
     res = res << 8;
     res += s->memory_values[i + address];
   }
@@ -29,12 +45,20 @@ uint32_t get_word(state *s, uint64_t address) {
 uint64_t get_doubleword(state *s, uint64_t address) {
   uint64_t res = 0;
   for (int8_t i = 7; i >= 0; i--) {
+    if (!is_address_initialised(s, address + i)) {
+      printf("ERROR: %d. byte of word at address %lx is not initialised", i + 1,
+             address);
+    }
     res = res << 8;
     res += s->memory_values[i + address];
   }
   return res;
 }
 uint64_t get_register(state *s, uint8_t register_number) {
+  if (!is_register_initialised(s, register_number)) {
+    printf("ERROR: register x%d is not initialised\n", register_number);
+  }
+
   return s->regs_values[register_number];
 }
 uint32_t get_next_command(state *s) { return get_word(s, s->pc); }
@@ -82,6 +106,7 @@ char *byte_to_hex(char *dest, uint8_t b) {
 }
 
 bool pretty_print(state *s) {
+  printf("\n\n"); // TODO: maybe remove
   printf("Registers:\n");
   printf("PC:%ld\n", s->pc);
   for (size_t i = 0; i < 32; i++) {
@@ -108,7 +133,6 @@ bool pretty_print(state *s) {
       printf("\n");
     }
   }
-  printf("\n\n"); // TODO: maybe remove
   return true;
 }
 

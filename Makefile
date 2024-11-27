@@ -1,4 +1,5 @@
 CFLAGS= -fsanitize=address -g -Wall
+
 .PHONY: clean checkstyle format debug
 
 clean: 
