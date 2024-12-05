@@ -22,6 +22,7 @@ uint16_t get_halfword(state *s, uint64_t address);
 uint32_t get_word(state *s, uint64_t address);
 uint64_t get_doubleword(state *s, uint64_t address);
 uint64_t get_register(state *s, uint8_t register_number);
+uint64_t get_pc(state *s);
 uint32_t get_next_command(state *s);
 
 void set_byte(state *s, uint64_t address, uint8_t value);

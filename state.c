@@ -61,6 +61,7 @@ uint64_t get_register(state *s, uint8_t register_number) {
 
   return s->regs_values[register_number];
 }
+uint64_t get_pc(state *s) { return s->pc; }
 uint32_t get_next_command(state *s) { return get_word(s, s->pc); }
 
 void set_byte(state *s, uint64_t address, uint8_t value) {
