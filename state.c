@@ -5,7 +5,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define LOAD_BUFFER_SIZE 32
+#define LOAD_BUFFER_SIZE 81  // At least 32!
+#define NAME_BUFFER_SIZE 32  // At least 10!
+#define VALUE_BUFFER_SIZE 32 // At least 22!
 
 // TODO: currently no checks if is initialised
 uint8_t get_byte(state *s, uint64_t address) {
@@ -219,10 +221,11 @@ bool load_state(char *filename, state *s) {
   }
 
   char *dp_pointer;
-  char name_buffer[10];  // longest possible register will be ft11 (if
-                         // implemented), 32bit address has 9 chars (2x4 hexcode
-                         // + ' ')
-  char value_buffer[22]; // All values, addresses,
+  char name_buffer[NAME_BUFFER_SIZE]; // longest possible register will be ft11
+                                      // (if implemented), 32bit address has 9
+                                      // chars (2x4 hexcode
+                                      // + ' ')
+  char value_buffer[VALUE_BUFFER_SIZE]; // All values, addresses,
   uint8_t name_length;
 
   buffer_valid = fgets(buffer, sizeof(buffer), state_file);
