@@ -2,3 +2,4 @@
 risc_v_sim
 states/*
 !states/test.state
+!states/test_commands.state
