@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <stdint.h>
+#include "./memory_table.h"
 
 #ifndef STATE
 #define STATE

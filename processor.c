@@ -300,7 +300,7 @@ void execute_jal(state *s, uint32_t command) {
   int32_t offset = 0;
   if (command & 0x80000000) // offset is negative
   {
-    offset -=
+    offset |=
         0xFFF00000; // sign extend offset and set highest bit, offset is 21bit
   }
   offset |= (command & 0x7FE00000) >> 20; // offset[10:1] is at command[30:21]

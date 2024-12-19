@@ -1,4 +1,4 @@
-CFLAGS= -fsanitize=address -g -Wall
+CFLAGS= -g -Wall
 
 .PHONY: clean checkstyle format debug
 
@@ -13,14 +13,17 @@ format:
 
 compile: risc_v_sim
 
-risc_v_sim: risc_v_sim.o state.o processor.o
-	gcc $(CFLAGS) risc_v_sim.o state.o processor.o -o risc_v_sim
+risc_v_sim: risc_v_sim.o state.o processor.o memory_table.o
+	gcc $(CFLAGS) risc_v_sim.o state.o processor.o memory_table.o -o risc_v_sim
 
 risc_v_sim.o: risc_v_sim.c state.h processor.h
 	gcc $(CFLAGS) -c risc_v_sim.c -o risc_v_sim.o
 
-state.o: state.c state.h
+state.o: state.c state.h memory_table.h
 	gcc $(CFLAGS) -c state.c -o state.o
 
 processor.o: processor.c processor.h state.h
 	gcc $(CFLAGS) -c processor.c -o processor.o
+
+memory_table.o: memory_table.c memory_table.h
+	gcc $(CFLAGS) -c memory_table.c -o memory_table.o

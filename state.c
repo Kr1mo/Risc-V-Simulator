@@ -1,4 +1,5 @@
 #include "./state.h"
+#include "./memory_table.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -331,6 +332,9 @@ bool load_state(char *filename, state *s) {
     buffer_valid = fgets(buffer, sizeof(buffer), state_file);
     remove_comment(buffer);
   }
+
+  // TODO fclose??
+  fclose(state_file);
 
   return true;
 }
