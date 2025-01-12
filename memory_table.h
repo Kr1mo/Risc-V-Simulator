@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 #ifndef MEMORY_TABLE
 #define MEMORY_TABLE
@@ -21,7 +22,9 @@ typedef struct memory_table {
 uint32_t hash(int64_t address);
 
 memory_cell *create_memory_cell(uint64_t address, uint8_t content);
-void add_memory_cell(memory_table *table, memory_cell *cell);
+void set_memory_cell(memory_table *table, memory_cell *cell);
+void set_memory(memory_table*table, uint64_t address, uint8_t content);
+bool exists_address_in_table(memory_table*table, uint64_t address);
 
 uint8_t get_memory_cell_content(
     memory_table *table,

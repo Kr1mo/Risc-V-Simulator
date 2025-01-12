@@ -5,6 +5,7 @@
 uint32_t hash(int64_t address) { // copied the one_at_a_time hashing algorithm,
                                  // seemed sufficient. Algorithm is sligthly
                                  // modified to fit my case
+                                 //https://en.wikipedia.org/wiki/Jenkins_hash_function 12.01.25
   uint8_t i = 0;
   uint32_t hash = 0;
   while (i != 8) {
@@ -25,18 +26,43 @@ memory_cell *create_memory_cell(uint64_t address, uint8_t content) {
   cell->next_cell = NULL;
   return cell;
 }
-void add_memory_cell(memory_table *table, memory_cell *cell) {
+void set_memory_cell(memory_table *table, memory_cell *cell) {
   uint32_t location = hash(cell->address);
   if (!table->memory[location]) {
     table->memory[location] = cell;
   } else {
     memory_cell *previous = table->memory[location];
     while (previous->next_cell) {
+      if (cell->address == previous->address)
+    {
+      previous->content = cell->content;
+      free(cell);
+      return; // Don't increase initialised cells, number of cells did not change
+    }
       previous = previous->next_cell;
     }
     previous->next_cell = cell;
   }
   table->initialised_cells++;
+}
+void set_memory(memory_table*table, uint64_t address, uint8_t content) {
+  set_memory_cell(table, create_memory_cell(address, content));
+}
+bool exists_address_in_table(memory_table*table, uint64_t address){
+  uint32_t location = hash(address);
+  if (table->memory[location])
+  {
+    memory_cell* previous = table->memory[location];
+    while (previous)
+    {
+      if (previous->address == address)
+      {
+        return true;
+      }
+      previous = previous->next_cell;
+    }
+  }
+  return false;
 }
 
 uint8_t get_memory_cell_content(
@@ -100,5 +126,10 @@ uint64_t *get_initialised_adresses(memory_table *table) {
       }
     }
   }
+  qsort(addresses + sizeof(uint64_t), addresses[0], sizeof(uint64_t), compare );
   return addresses;
+}
+int compare (const void * a, const void * b)
+{
+  return ( *(int*)a - *(int*)b );
 }

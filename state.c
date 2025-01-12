@@ -10,13 +10,12 @@
 #define NAME_BUFFER_SIZE 32  // At least 10!
 #define VALUE_BUFFER_SIZE 32 // At least 22!
 
-// TODO: currently no checks if is initialised
 uint8_t get_byte(state *s, uint64_t address) {
   if (!is_address_initialised(s, address)) {
     printf("ERROR: address %lx is not initialised", address);
   }
 
-  return s->memory_values[address];
+  return get_memory_cell_content(s->memory, address);
 }
 uint16_t get_halfword(state *s, uint64_t address) {
   uint16_t res = 0;
@@ -28,9 +27,9 @@ uint16_t get_halfword(state *s, uint64_t address) {
     printf("ERROR: higher byte for halfword address %lx is not initialised",
            address + 1);
   }
-  res += s->memory_values[address + 1];
+  res += get_memory_cell_content(s->memory, address + 1);
   res = res << 8;
-  res += s->memory_values[address];
+  res += get_memory_cell_content(s->memory, address);
   return res;
 }
 uint32_t get_word(state *s, uint64_t address) {
@@ -41,7 +40,7 @@ uint32_t get_word(state *s, uint64_t address) {
              address);
     }
     res = res << 8;
-    res += s->memory_values[i + address];
+    res += get_memory_cell_content(s->memory, address + i);
   }
   return res;
 }
@@ -53,7 +52,7 @@ uint64_t get_doubleword(state *s, uint64_t address) {
              address);
     }
     res = res << 8;
-    res += s->memory_values[i + address];
+    res += get_memory_cell_content(s->memory, address + i);
   }
   return res;
 }
@@ -68,25 +67,21 @@ uint64_t get_pc(state *s) { return s->pc; }
 uint32_t get_next_command(state *s) { return get_word(s, s->pc); }
 
 void set_byte(state *s, uint64_t address, uint8_t value) {
-  s->memory_values[address] = value;
-  s->memory_init[address] = true;
+  set_memory(s->memory, address, value);
 }
 void set_halfword(state *s, uint64_t address, uint16_t value) {
   for (size_t i = 0; i < 2; i++) {
-    s->memory_values[i] = (value >> (8 * i)) & 0xFF;
-    s->memory_init[i] = true;
+    set_memory(s->memory, address + i, (value >> (8 * i)) & 0xFF);
   }
 }
 void set_word(state *s, uint64_t address, uint32_t value) {
   for (size_t i = 0; i < 4; i++) {
-    s->memory_values[i] = (value >> (8 * i)) & 0xFF;
-    s->memory_init[i] = true;
+    set_memory(s->memory, address + i, (value >> (8 * i)) & 0xFF);
   }
 }
 void set_doubleword(state *s, uint64_t address, uint64_t value) {
   for (size_t i = 0; i < 8; i++) {
-    s->memory_values[i] = (value >> (8 * i)) & 0xFF;
-    s->memory_init[i] = true;
+    set_memory(s->memory, address + i, (value >> (8 * i)) & 0xFF);
   }
 }
 void set_register(state *s, uint8_t register_number, uint64_t value) {
@@ -110,7 +105,7 @@ char *byte_to_hex(char *dest, uint8_t b) {
 }
 
 bool pretty_print(state *s) {
-  printf("\n\n"); // TODO: maybe remove
+  printf("\n_____________________________\n\n"); // TODO: maybe remove
   printf("Registers:\n");
   printf("PC:%ld\n", s->pc);
   for (size_t i = 0; i < 32; i++) {
@@ -122,26 +117,49 @@ bool pretty_print(state *s) {
 
   printf("Memory:\n");
 
-  char hex_str[3];
-  hex_str[2] = '\0';
-  for (size_t i = 0; i < MEMORY_SIZE; i = i + 4) {
-    if (s->memory_init[i]) {
-      byte_to_hex(hex_str, i);
-      printf("%s: ", hex_str);
-      for (int j = 3; j >= 0; j--) {
+  uint64_t* addresses = get_initialised_adresses(s->memory);
+  uint64_t n_printed_values = 0;
 
-        byte_to_hex(hex_str, s->memory_values[i + j]);
-
-        printf("%s ", hex_str);
+  while (n_printed_values<=addresses[0]) // As log as not all values to the corresponding addresses are printed
+  {
+    printf("%x: ", addresses[n_printed_values+1]);
+    uint8_t chain = 0;
+    for (size_t i = 0; i < 8; i++)
+    {
+      if (i == addresses[n_printed_values+i+1]-addresses[n_printed_values+1])
+      {
+        chain++;
       }
-      printf("\n");
+      else
+      {
+        break;
+      }      
     }
+
+    if (chain == 3) // If chain is no power of 2, change this.
+    {
+      chain = 2; 
+    } else if (4 < chain && chain < 8)
+    {
+      chain = 4;
+    }
+
+    char hex_str[3];
+    hex_str[2] = '\0';
+    for (int j = chain; j >= 1; j--) { // j for address calculation seems 1 to big, but so a +1 in the next line is not needed.
+         byte_to_hex(hex_str, get_byte(s, addresses[n_printed_values + j])); 
+         printf("%s ", hex_str);
+       }
+
+    printf("\n");
+    n_printed_values += chain;
   }
+  free(addresses);
   return true;
 }
 
 bool is_address_initialised(state *s, uint64_t address) {
-  return s->memory_init[address];
+  return exists_address_in_table(s->memory, address);
 }
 bool is_register_initialised(state *s, uint8_t register_number) {
   return s->regs_init[register_number];
@@ -163,11 +181,7 @@ state *create_new_state() {
     new->regs_values[i] = 0;
     new->regs_init[i] = false;
   }
-
-  for (size_t i = 0; i < MEMORY_SIZE; i++) {
-    new->memory_init[i] = false;
-    new->memory_values[i] = 0;
-  }
+  new->memory = create_memory_table();
 
   return new;
 }
@@ -305,15 +319,15 @@ bool load_state(char *filename, state *s) {
     remove_whitespace(value_buffer);
 
     uint32_t address = strtoul(name_buffer, NULL, 16);
-    if (address >= MEMORY_SIZE) {
-      printf("ERROR: memory address %x out of current bounds of %d\n", address,
-             MEMORY_SIZE);
-      continue;
-    }
+    //if (address >= MEMORY_SIZE) {
+    //  printf("ERROR: memory address %x out of current bounds of %d\n", address,
+    //         MEMORY_SIZE);
+    //  continue;
+    //}
 
     int8_t next_byte_offset = strlen(value_buffer);
-    if (next_byte_offset != 8 && next_byte_offset != 16) {
-      printf("ERROR: Memory allocation at address %d neither 32 nor 64 bit, "
+    if (next_byte_offset != 8 && next_byte_offset != 16 && next_byte_offset != 4 && next_byte_offset != 2) {
+      printf("ERROR: Memory allocation at address %d neither 8, 16, 32 nor 64 bit, "
              "but %d\n",
              address, next_byte_offset);
       continue;
@@ -322,9 +336,7 @@ bool load_state(char *filename, state *s) {
     while (next_byte_offset) {
       next_byte_offset--;
       next_byte_offset--;
-      s->memory_values[address] =
-          strtoul(value_buffer + next_byte_offset, NULL, 16);
-      s->memory_init[address] = true;
+      set_memory(s->memory, address, strtoul(value_buffer + next_byte_offset, NULL, 16));
       value_buffer[next_byte_offset] = '\0';
       address++;
     }
@@ -339,6 +351,9 @@ bool load_state(char *filename, state *s) {
   return true;
 }
 
+
+//TODO: upgrade to hashed memory
+
 bool kill_state(state *s, char *filename) {
   FILE *end_state = fopen(filename, "w");
   fprintf(end_state, "REGISTERS:\n");
@@ -349,27 +364,47 @@ bool kill_state(state *s, char *filename) {
     }
   }
   fprintf(end_state, "\nMEMORY:\n");
-  char hex_str[3];
-  hex_str[2] = '\0';
-  for (size_t i = 0; i < MEMORY_SIZE; i = i + 4) {
-    if (s->memory_init[i] || s->memory_init[i + 1] || s->memory_init[i + 2] ||
-        s->memory_init[i + 3]) {
-      byte_to_hex(hex_str, i);
-      fprintf(end_state, "%s:", hex_str);
+  uint64_t* addresses = get_initialised_adresses(s->memory);
+  uint64_t n_printed_values = 0;
 
-      for (int8_t j = 3; j >= 0; j--) {
-        byte_to_hex(hex_str, s->memory_values[i + j]);
-        fprintf(end_state, "%s", hex_str);
-
-        if (j == 2) {
-          fprintf(end_state, " ");
-        }
+  while (n_printed_values<addresses[0]) // As log as not all values to the corresponding addresses are printed
+  {
+    printf("%x: ", addresses[n_printed_values+1]);
+    uint8_t chain = 0;
+    for (size_t i = 0; i < 8; i++)
+    {
+      if (i == addresses[n_printed_values+i+1]-addresses[n_printed_values+1])
+      {
+        chain++;
       }
-      fprintf(end_state, "\n");
+      else
+      {
+        break;
+      }      
     }
+
+    if (chain == 3) // If chain is no power of 2, change this.
+    {
+      chain = 2; 
+    } else if (4 < chain && chain < 8)
+    {
+      chain = 4;
+    }
+
+    char hex_str[3];
+    hex_str[2] = '\0';
+    for (int j = chain; j > 0; j--) { // j for address calculation seems 1 to big, but with this a +1 in the next line is not needed.
+         byte_to_hex(hex_str, get_byte(s, addresses[n_printed_values + j])); 
+         printf("%s ", hex_str);
+       }
+
+    printf("\n");
+    n_printed_values += chain;
   }
 
   fclose(end_state);
+  free(addresses);
+  kill_memory_table(s->memory);
   free(s);
 
   return true;
