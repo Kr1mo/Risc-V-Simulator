@@ -1,6 +1,6 @@
 CFLAGS= -g -Wall
 
-.PHONY: clean checkstyle format debug
+.PHONY: clean checkstyle format
 
 clean: 
 	rm -f *.o risc_v_sim
