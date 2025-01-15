@@ -108,6 +108,8 @@ void kill_memory_table(memory_table *table) {
   free(table);
 }
 
+int compare(const void *a, const void *b) { return (*(int *)a - *(int *)b); }
+
 uint64_t *get_initialised_adresses(memory_table *table) {
   uint64_t *addresses =
       malloc(sizeof(uint64_t) *
@@ -129,4 +131,3 @@ uint64_t *get_initialised_adresses(memory_table *table) {
   qsort(addresses + sizeof(uint64_t), addresses[0], sizeof(uint64_t), compare);
   return addresses;
 }
-int compare(const void *a, const void *b) { return (*(int *)a - *(int *)b); }
