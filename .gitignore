@@ -1,5 +1,5 @@
 *.o
 risc_v_sim
-teststates/*
-!teststates/basic.state
-!teststates/test_commands.state
+states/*
+!states/basic.state
+!states/test_commands.state

@@ -120,7 +120,7 @@ bool pretty_print(state *s) {
   uint64_t *addresses = get_initialised_adresses(s->memory);
   uint64_t n_printed_values = 0;
 
-  while (n_printed_values <=
+  while (n_printed_values <
          addresses[0]) // As log as not all values to the corresponding
                        // addresses are printed
   {
