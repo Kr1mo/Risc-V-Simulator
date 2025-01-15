@@ -2,10 +2,12 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-uint32_t hash(int64_t address) { // copied the one_at_a_time hashing algorithm,
-                                 // seemed sufficient. Algorithm is sligthly
-                                 // modified to fit my case
-                                 //https://en.wikipedia.org/wiki/Jenkins_hash_function 12.01.25
+uint32_t
+hash(int64_t address) { // copied the one_at_a_time hashing algorithm,
+                        // seemed sufficient. Algorithm is sligthly
+                        // modified to fit my case
+                        // https://en.wikipedia.org/wiki/Jenkins_hash_function
+                        // 12.01.25
   uint8_t i = 0;
   uint32_t hash = 0;
   while (i != 8) {
@@ -33,30 +35,27 @@ void set_memory_cell(memory_table *table, memory_cell *cell) {
   } else {
     memory_cell *previous = table->memory[location];
     while (previous->next_cell) {
-      if (cell->address == previous->address)
-    {
-      previous->content = cell->content;
-      free(cell);
-      return; // Don't increase initialised cells, number of cells did not change
-    }
+      if (cell->address == previous->address) {
+        previous->content = cell->content;
+        free(cell);
+        return; // Don't increase initialised cells, number of cells did not
+                // change
+      }
       previous = previous->next_cell;
     }
     previous->next_cell = cell;
   }
   table->initialised_cells++;
 }
-void set_memory(memory_table*table, uint64_t address, uint8_t content) {
+void set_memory(memory_table *table, uint64_t address, uint8_t content) {
   set_memory_cell(table, create_memory_cell(address, content));
 }
-bool exists_address_in_table(memory_table*table, uint64_t address){
+bool exists_address_in_table(memory_table *table, uint64_t address) {
   uint32_t location = hash(address);
-  if (table->memory[location])
-  {
-    memory_cell* previous = table->memory[location];
-    while (previous)
-    {
-      if (previous->address == address)
-      {
+  if (table->memory[location]) {
+    memory_cell *previous = table->memory[location];
+    while (previous) {
+      if (previous->address == address) {
         return true;
       }
       previous = previous->next_cell;
@@ -110,7 +109,8 @@ void kill_memory_table(memory_table *table) {
 }
 
 uint64_t *get_initialised_adresses(memory_table *table) {
-  uint64_t *addresses = malloc(sizeof(uint64_t) *
+  uint64_t *addresses =
+      malloc(sizeof(uint64_t) *
              (table->initialised_cells + 1)); // +1 for length of the list
   addresses[0] = table->initialised_cells;
   uint16_t address_index = 1;
@@ -126,10 +126,7 @@ uint64_t *get_initialised_adresses(memory_table *table) {
       }
     }
   }
-  qsort(addresses + sizeof(uint64_t), addresses[0], sizeof(uint64_t), compare );
+  qsort(addresses + sizeof(uint64_t), addresses[0], sizeof(uint64_t), compare);
   return addresses;
 }
-int compare (const void * a, const void * b)
-{
-  return ( *(int*)a - *(int*)b );
-}
+int compare(const void *a, const void *b) { return (*(int *)a - *(int *)b); }

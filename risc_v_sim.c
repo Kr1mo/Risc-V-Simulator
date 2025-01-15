@@ -9,14 +9,22 @@
 int main(int argc, char **argv) {
   char *source_state;
   char *end_state = NULL;
-  uint16_t n_cycles = 1;
+  int n_cycles = 1;
+  bool keep_going_until_not_initialised = false;
   bool debug = false;
   int opt;
 
-  while ((opt = getopt(argc, argv, "c:e:d")) != -1) {
+  while ((opt = getopt(argc, argv, "n:e:d")) != -1) {
     switch (opt) {
-    case 'n':
+    case 'c':
       n_cycles = strtol(optarg, NULL, 10);
+      if (n_cycles == -1) {
+        keep_going_until_not_initialised = true;
+      } else if (n_cycles < 0) // only -1 starts "perpetual" execution, other
+                               // negative values are ignored
+      {
+        n_cycles = 0;
+      }
       break;
 
     case 'e':
@@ -64,13 +72,38 @@ int main(int argc, char **argv) {
 
   state *s = create_new_state();
   load_state(source_state, s);
-  pretty_print(s);
-  if (is_next_command_initialised(s)) {
-    execute_next_command(s);
+  if (debug) {
     pretty_print(s);
-  } else {
-    printf("ERROR: Memory at PC is not initialised\n");
   }
+  size_t executed_cycles = 0;
+  while (is_next_command_initialised(s) &&
+         (executed_cycles < n_cycles || keep_going_until_not_initialised)) {
+    execute_next_command(s);
+    if (debug) {
+      pretty_print(s);
+    }
+    executed_cycles++;
+  }
+  if (keep_going_until_not_initialised) {
+    printf("Ended execution after %ld cycles\n", executed_cycles);
+  } else if (executed_cycles < n_cycles) {
+    printf("ERROR: Memory at PC %ld is not initialised\n", get_pc(s));
+  }
+
+  for (size_t i = 0; i < n_cycles; i++) {
+    if (is_next_command_initialised(s)) {
+      execute_next_command(s);
+      if (debug) {
+        pretty_print(s);
+      }
+    } else {
+      printf("ERROR: Memory at PC %ld is not initialised\n", get_pc(s));
+      break;
+    }
+  }
+
+  printf("\n\nLast State:\n");
+  pretty_print(s);
 
   if (end_state) {
     kill_state(s, end_state);
