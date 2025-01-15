@@ -129,6 +129,6 @@ uint64_t *get_initialised_adresses(memory_table *table) {
       }
     }
   }
-  qsort(addresses + sizeof(uint64_t), addresses[0], sizeof(uint64_t), compare);
+  qsort(&addresses[1], addresses[0], sizeof(uint64_t), compare);
   return addresses;
 }

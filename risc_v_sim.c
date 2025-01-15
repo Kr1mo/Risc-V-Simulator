@@ -43,6 +43,7 @@ int main(int argc, char **argv) {
 
     case 'd':
       debug = true;
+      break;
 
     case '?':
       if (optopt == 'c' || optopt == 'e')
@@ -75,6 +76,8 @@ int main(int argc, char **argv) {
   if (debug) {
     pretty_print(s);
   }
+
+  
   size_t executed_cycles = 0;
   while (is_next_command_initialised(s) &&
          (executed_cycles < n_cycles || keep_going_until_not_initialised)) {
@@ -88,18 +91,6 @@ int main(int argc, char **argv) {
     printf("Ended execution after %ld cycles\n", executed_cycles);
   } else if (executed_cycles < n_cycles) {
     printf("ERROR: Memory at PC %ld is not initialised\n", get_pc(s));
-  }
-
-  for (size_t i = 0; i < n_cycles; i++) {
-    if (is_next_command_initialised(s)) {
-      execute_next_command(s);
-      if (debug) {
-        pretty_print(s);
-      }
-    } else {
-      printf("ERROR: Memory at PC %ld is not initialised\n", get_pc(s));
-      break;
-    }
   }
 
   printf("\n\nLast State:\n");
