@@ -10,10 +10,11 @@ hash(int64_t address) { // copied the one_at_a_time hashing algorithm,
                         // 12.01.25
   uint8_t i = 0;
   uint32_t hash = 0;
-  while (i != 8) {
+  while (i < 8) {
     hash += (address >> (i * 8)) % 256; // use one byte per iteration
     hash += hash << 10;
     hash ^= hash >> 6;
+    i++;
   }
   hash += hash << 3;
   hash ^= hash >> 11;
