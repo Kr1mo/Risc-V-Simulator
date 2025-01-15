@@ -104,7 +104,9 @@ memory_table *create_memory_table() {
 }
 void kill_memory_table(memory_table *table) {
   for (size_t i = 0; i < TABLESIZE; i++) {
-    kill_memory_cell_recursive(table->memory[i]);
+    if (table->memory[i]) {
+      kill_memory_cell_recursive(table->memory[i]);
+    }
   }
   free(table);
 }

@@ -16,7 +16,7 @@ int main(int argc, char **argv) {
 
   while ((opt = getopt(argc, argv, "n:e:d")) != -1) {
     switch (opt) {
-    case 'c':
+    case 'n':
       n_cycles = strtol(optarg, NULL, 10);
       if (n_cycles == -1) {
         keep_going_until_not_initialised = true;
@@ -46,7 +46,7 @@ int main(int argc, char **argv) {
       break;
 
     case '?':
-      if (optopt == 'c' || optopt == 'e')
+      if (optopt == 'n' || optopt == 'e')
         fprintf(stderr, "Option -%c requires an argument.\n", optopt);
       else
         fprintf(stderr, "Unknown option `-%c'.\n", optopt);
@@ -55,7 +55,7 @@ int main(int argc, char **argv) {
       abort();
     }
   }
-  if (optind > argc) {
+  if (optind >= argc) {
     printf("Expected path state file after options\n");
     return 1;
   }
@@ -77,7 +77,6 @@ int main(int argc, char **argv) {
     pretty_print(s);
   }
 
-  
   size_t executed_cycles = 0;
   while (is_next_command_initialised(s) &&
          (executed_cycles < n_cycles || keep_going_until_not_initialised)) {
