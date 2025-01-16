@@ -124,7 +124,7 @@ bool pretty_print(state *s) {
                                           // corresponding addresses are printed
   {
     printf("  %lx: ", addresses[n_printed_values + 1]);
-    space =false;
+    space = false;
     uint8_t chain = 0;
     for (size_t i = 0; i < 8; i++) {
       if (i == addresses[n_printed_values + i + 1] -
@@ -149,16 +149,12 @@ bool pretty_print(state *s) {
                 // next line is not needed.
       byte_to_hex(hex_str, get_byte(s, addresses[n_printed_values + j]));
       printf("%s", hex_str);
-      if (space)
-      {
+      if (space) {
         printf(" ");
         space = false;
-      }else
-      {
+      } else {
         space = true;
       }
-      
-      
     }
 
     printf("\n");
@@ -347,8 +343,7 @@ bool load_state(char *filename, state *s) {
     }
 
     while (next_byte_offset) {
-      next_byte_offset--;
-      next_byte_offset--;
+      next_byte_offset -= 2;
       set_memory(s->memory, address,
                  strtoul(value_buffer + next_byte_offset, NULL, 16));
       value_buffer[next_byte_offset] = '\0';
@@ -407,12 +402,10 @@ bool kill_state(state *s, char *filename) {
                 // in the next line is not needed.
       byte_to_hex(hex_str, get_byte(s, addresses[n_printed_values + j]));
       fprintf(end_state, "%s", hex_str);
-      if (space)
-      {
+      if (space) {
         fprintf(end_state, " ");
         space = false;
-      }else
-      {
+      } else {
         space = true;
       }
     }

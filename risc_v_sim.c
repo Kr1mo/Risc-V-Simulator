@@ -34,9 +34,10 @@ int main(int argc, char **argv) {
         printf("No file extension for end state\n");
         break;
       }
-      if (strcmp(file_extension, ".state")) { //file extension is not .state
-        printf("Wrong file extension for end state, expected '.state', got '%s'\n",
-               file_extension);
+      if (strcmp(file_extension, ".state")) { // file extension is not .state
+        printf(
+            "Wrong file extension for end state, expected '.state', got '%s'\n",
+            file_extension);
         break;
       }
       end_state = optarg;

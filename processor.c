@@ -300,8 +300,8 @@ void execute_jal(state *s, uint32_t command) {
   int32_t offset = 0;
   if (command & 0x80000000) // offset is negative
   {
-    offset |=
-        0xFFFFFFFFFFF00000; // sign extend offset and set highest bit, offset is 21bit
+    offset |= 0xFFFFFFFFFFF00000; // sign extend offset and set highest bit,
+                                  // offset is 21bit
   }
   offset |= (command & 0x7FE00000) >> 20; // offset[10:1] is at command[30:21]
   offset |= (command & 0x00100000) >> 9;  // offset[11] is at command[20]
@@ -319,7 +319,8 @@ void execute_jalr(
   int16_t offset = 0;
   if (command & 0x80000000) // offset is negative
   {
-    offset |= 0xFFFFFFFFFFFFF000; // sign extend offset and set highest bit, offset is 21bit
+    offset |= 0xFFFFFFFFFFFFF000; // sign extend offset and set highest bit,
+                                  // offset is 21bit
   }
   offset |= (command & 0xFFF00000) >> 20; // offset[11:0] is at command[31:20]
   uint8_t rd = (command >> 7) % 32;
