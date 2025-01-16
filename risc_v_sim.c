@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
         printf("No file extension for end state\n");
         break;
       }
-      if (!strcmp(file_extension, ".state")) {
+      if (strcmp(file_extension, ".state")) { //file extension is not .state
         printf("Wrong file extension for end state, expected '.state', got '%s'\n",
                file_extension);
         break;
@@ -87,6 +87,7 @@ int main(int argc, char **argv) {
          (executed_cycles < n_cycles || keep_going_until_not_initialised)) {
     execute_next_command(s);
     if (debug) {
+      printf("\n--------------------\n\n");
       pretty_print(s);
     }
     executed_cycles++;

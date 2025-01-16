@@ -112,6 +112,9 @@ void kill_memory_table(memory_table *table) {
 }
 
 int compare(const void *a, const void *b) { return (*(int *)a - *(int *)b); }
+int compare_alt(const void *a, const void *b){
+  return (*(uint64_t*)a > *(uint64_t*)b) - (*(uint64_t*)a < *(uint64_t*)b);
+  }
 
 uint64_t *get_initialised_adresses(memory_table *table) {
   uint64_t *addresses =
@@ -131,6 +134,6 @@ uint64_t *get_initialised_adresses(memory_table *table) {
       }
     }
   }
-  qsort(&addresses[1], addresses[0], sizeof(uint64_t), compare);
+  qsort(&addresses[1], addresses[0], sizeof(uint64_t), compare_alt);
   return addresses;
 }

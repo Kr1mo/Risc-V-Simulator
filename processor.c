@@ -87,7 +87,7 @@ void execute_math_immediate(state *s, uint32_t command) {
   int64_t immediate = 0;
   if (command & 0x80000000) // immediate is negative
   {
-    immediate -= 0xFFFFFFFFFFFFF800; // sign extend immediate
+    immediate |= 0xFFFFFFFFFFFFF800; // sign extend immediate
   }
   immediate |=
       (command & 0xFFF00000) >> 20; // immediate[11:0] is at command[31:20]
@@ -150,7 +150,7 @@ void execute_store(state *s, uint32_t command) {
   int16_t offset = 0;       // offset is 12bit and split into 2 parts
   if (command & 0x80000000) // offset is negative
   {
-    offset -= 0xF000; // sign extend offset
+    offset |= 0xFFFFFFFFFFFFF000; // sign extend offset
   }
   offset |= (command & 0xFE000000) >> 20; // offset[11:5] is at command[31:25]
   offset |= (command >> 7) % 32;          // offset[4:0] is at command[11:7]
@@ -189,7 +189,7 @@ void execute_load(state *s, uint32_t command) {
   int16_t immediate = 0;
   if (command & 0x80000000) // immediate is negative
   {
-    immediate -= 0xF800; // sign extend immediate
+    immediate |= 0xFFFFFFFFFFFFF800; // sign extend immediate
   }
   immediate |=
       (command & 0xFFF00000) >> 20; // immediate[11:0] is at command[31:20]
@@ -253,7 +253,7 @@ void execute_branch(state *s, uint32_t command) {
                       // add them successively
   if (command & 0x80000000) // offset is negative
   {
-    offset -= 0xF000; // sign extend offset
+    offset |= 0xFFFFFFFFFFFFF000; // sign extend offset
   }
   offset |= (command & 0x7E000000) >> 20; // offset[10:5] is at command[30:25]
   offset |= (command & 0x00000F00) >> 7;  // offset[4:1] is at command[11:8]
@@ -301,7 +301,7 @@ void execute_jal(state *s, uint32_t command) {
   if (command & 0x80000000) // offset is negative
   {
     offset |=
-        0xFFF00000; // sign extend offset and set highest bit, offset is 21bit
+        0xFFFFFFFFFFF00000; // sign extend offset and set highest bit, offset is 21bit
   }
   offset |= (command & 0x7FE00000) >> 20; // offset[10:1] is at command[30:21]
   offset |= (command & 0x00100000) >> 9;  // offset[11] is at command[20]
@@ -319,7 +319,7 @@ void execute_jalr(
   int16_t offset = 0;
   if (command & 0x80000000) // offset is negative
   {
-    offset -= 0xF000; // sign extend offset and set highest bit, offset is 21bit
+    offset |= 0xFFFFFFFFFFFFF000; // sign extend offset and set highest bit, offset is 21bit
   }
   offset |= (command & 0xFFF00000) >> 20; // offset[11:0] is at command[31:20]
   uint8_t rd = (command >> 7) % 32;
@@ -335,7 +335,7 @@ void execute_lui(state *s, uint32_t command) {
   uint64_t immediate = 0;
   if (command & 0x80000000) // offset is negative
   {
-    immediate -= 0xFFFFFFFF00000000; // sign extend offset and set highest bit,
+    immediate |= 0xFFFFFFFF00000000; // sign extend offset and set highest bit,
                                      // offset is 21bit
   }
   immediate |= (command & 0xFFFFF000); // immediate[31:12] is at command[31:12]
@@ -348,7 +348,7 @@ void execute_auipc(state *s, uint32_t command) {
   uint64_t immediate = 0;
   if (command & 0x80000000) // offset is negative
   {
-    immediate -= 0xFFFFFFFF00000000; // sign extend offset and set highest bit,
+    immediate |= 0xFFFFFFFF00000000; // sign extend offset and set highest bit,
                                      // offset is 21bit
   }
   immediate |= (command & 0xFFFFF000); // immediate[31:12] is at command[31:12]

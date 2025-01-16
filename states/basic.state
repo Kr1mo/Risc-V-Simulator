@@ -4,7 +4,7 @@ x1:ffff ffff ffff fffd #NO DOUBLEQUOTES IN COMMENTS ! (maybe TODO)
 x2:0000 0000 0000 003f
 
 MEMORY:             #cmd rd rs1 rs2
-0000 0000:0020 81b3 #add x3 x1 x2
-0000 0004:0020 d1b3 #srl x3 x1 x2
-0000 0008:4020 d1b3 #sra x3 x1 x2
+0000 0000:0020 81b3 #add x3 x1 x2; x3 -> 0x3c
+0000 0004:0020 d233 #srl x4 x1 x2; x4 -> 1
+0000 0008:4020 d2b3 #sra x5 x1 x2; x5 -> -1
 0000 003c:0123456789abcdef #test for 64bit input and different spaces

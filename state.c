@@ -118,11 +118,13 @@ bool pretty_print(state *s) {
 
   uint64_t *addresses = get_initialised_adresses(s->memory);
   uint64_t n_printed_values = 0;
+  bool space = false;
 
   while (n_printed_values < addresses[0]) // As log as not all values to the
                                           // corresponding addresses are printed
   {
     printf("  %lx: ", addresses[n_printed_values + 1]);
+    space =false;
     uint8_t chain = 0;
     for (size_t i = 0; i < 8; i++) {
       if (i == addresses[n_printed_values + i + 1] -
@@ -146,7 +148,17 @@ bool pretty_print(state *s) {
          j--) { // j for address calculation seems 1 to big, but so a +1 in the
                 // next line is not needed.
       byte_to_hex(hex_str, get_byte(s, addresses[n_printed_values + j]));
-      printf("%s ", hex_str);
+      printf("%s", hex_str);
+      if (space)
+      {
+        printf(" ");
+        space = false;
+      }else
+      {
+        space = true;
+      }
+      
+      
     }
 
     printf("\n");
@@ -364,11 +376,13 @@ bool kill_state(state *s, char *filename) {
   fprintf(end_state, "\nMEMORY:\n");
   uint64_t *addresses = get_initialised_adresses(s->memory);
   uint64_t n_printed_values = 0;
+  bool space = false;
 
   while (n_printed_values < addresses[0]) // As log as not all values to the
                                           // corresponding addresses are printed
   {
     fprintf(end_state, "%lx: ", addresses[n_printed_values + 1]);
+    space = false;
     uint8_t chain = 0;
     for (size_t i = 0; i < 8; i++) {
       if (i == addresses[n_printed_values + i + 1] -
@@ -392,7 +406,15 @@ bool kill_state(state *s, char *filename) {
          j--) { // j for address calculation seems 1 to big, but with this a +1
                 // in the next line is not needed.
       byte_to_hex(hex_str, get_byte(s, addresses[n_printed_values + j]));
-      fprintf(end_state, "%s ", hex_str);
+      fprintf(end_state, "%s", hex_str);
+      if (space)
+      {
+        fprintf(end_state, " ");
+        space = false;
+      }else
+      {
+        space = true;
+      }
     }
 
     fprintf(end_state, "\n");

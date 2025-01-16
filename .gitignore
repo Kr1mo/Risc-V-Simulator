@@ -1,4 +1,5 @@
 *.o
+*.state
 risc_v_sim
 states/*
 !states/basic.state
