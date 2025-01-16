@@ -105,17 +105,16 @@ char *byte_to_hex(char *dest, uint8_t b) {
 }
 
 bool pretty_print(state *s) {
-  printf("\n_____________________________\n\n"); // TODO: maybe remove
   printf("Registers:\n");
-  printf("PC:%ld\n", s->pc);
+  printf("  PC:%ld\n", s->pc);
   for (size_t i = 0; i < 32; i++) {
     if (s->regs_init[i]) {
       int64_t value_signed = s->regs_values[i];
-      printf("x%ld:%ld\n", i, value_signed);
+      printf("  x%ld:%ld\n", i, value_signed);
     }
   }
 
-  printf("Memory:\n");
+  printf("\nMemory:\n");
 
   uint64_t *addresses = get_initialised_adresses(s->memory);
   uint64_t n_printed_values = 0;
@@ -123,7 +122,7 @@ bool pretty_print(state *s) {
   while (n_printed_values < addresses[0]) // As log as not all values to the
                                           // corresponding addresses are printed
   {
-    printf("%lx: ", addresses[n_printed_values + 1]);
+    printf("  %lx: ", addresses[n_printed_values + 1]);
     uint8_t chain = 0;
     for (size_t i = 0; i < 8; i++) {
       if (i == addresses[n_printed_values + i + 1] -

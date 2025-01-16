@@ -12,9 +12,10 @@ int main(int argc, char **argv) {
   int n_cycles = 1;
   bool keep_going_until_not_initialised = false;
   bool debug = false;
+  bool print_last_state = false;
   int opt;
 
-  while ((opt = getopt(argc, argv, "n:e:d")) != -1) {
+  while ((opt = getopt(argc, argv, "n:e:dl")) != -1) {
     switch (opt) {
     case 'n':
       n_cycles = strtol(optarg, NULL, 10);
@@ -34,7 +35,7 @@ int main(int argc, char **argv) {
         break;
       }
       if (!strcmp(file_extension, ".state")) {
-        printf("Wrong file extension for end state, expected .state, got %s\n",
+        printf("Wrong file extension for end state, expected '.state', got '%s'\n",
                file_extension);
         break;
       }
@@ -43,6 +44,10 @@ int main(int argc, char **argv) {
 
     case 'd':
       debug = true;
+      break;
+
+    case 'l':
+      print_last_state = true;
       break;
 
     case '?':
@@ -92,8 +97,10 @@ int main(int argc, char **argv) {
     printf("ERROR: Memory at PC %ld is not initialised\n", get_pc(s));
   }
 
-  printf("\n\nLast State:\n");
-  pretty_print(s);
+  if (print_last_state) {
+    printf("\n-- Last State --\n");
+    pretty_print(s);
+  }
 
   if (end_state) {
     kill_state(s, end_state);
