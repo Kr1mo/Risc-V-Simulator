@@ -9,7 +9,7 @@
 int main(int argc, char **argv) {
   char *source_state = "states/fill_memory.state"; // Special for this branch: A standard state to use :)
   char *end_state = NULL;
-  int n_cycles = 1;
+  int n_cycles = -1;
   bool keep_going_until_not_initialised = false;
   bool debug = false;
   bool print_last_state = false;
@@ -60,21 +60,21 @@ int main(int argc, char **argv) {
       abort();
     }
   }
-  if (optind >= argc) {
-    printf("Expected path state file after options\n");
-    return 1;
-  }
-  char *file_extension = strrchr(argv[optind], '.');
-  if (!file_extension) {
-    printf("No file extension for initial state\n");
-    return 0;
-  }
-  if (strcmp(file_extension, ".state")) { // file extension is NOT .state
-    printf("Wrong file extension for initial state, expected .state, got %s\n",
-           file_extension);
-    return 0;
-  }
-  source_state = argv[optind];
+//  if (optind >= argc) {
+//    printf("Expected path state file after options\n");
+//    return 1;
+//  }
+//  char *file_extension = strrchr(argv[optind], '.');
+//  if (!file_extension) {
+//    printf("No file extension for initial state\n");
+//    return 1;
+//  }
+//  if (strcmp(file_extension, ".state")) { // file extension is NOT .state
+//    printf("Wrong file extension for initial state, expected .state, got %s\n",
+//           file_extension);
+//    return 1;
+//  }
+//  source_state = argv[optind];
 
   state *s = create_new_state();
   load_state(source_state, s);
