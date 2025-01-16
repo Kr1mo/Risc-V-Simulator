@@ -118,10 +118,10 @@ int compare_alt(const void *a, const void *b){
   }
 
 uint64_t *get_initialised_adresses(memory_table *table) {
-  int8_t deepness = 0;
+  uint16_t deepness = 0;
   int64_t overall = 0;
-  int64_t over = 0;
-  int64_t under = 0;
+  uint64_t over = 0;
+  uint64_t under = 0;
   int64_t average_chainig = table->initialised_cells / TABLESIZE;
   int64_t tolerated_over = average_chainig + 5;
   int64_t tolerated_under = average_chainig - 5;
@@ -159,7 +159,7 @@ uint64_t *get_initialised_adresses(memory_table *table) {
     }
     overall += deepness;
   }
-printf("\nOverall counted %ld of %ld cells\nAt least 5 over expected: %ld, under: %ld\n", overall, table->initialised_cells, over, under);
+printf("\nOverall counted %ld of %ld cells\nExpected: %ld, at least 5 over: %ld, under: %ld\n", overall, table->initialised_cells, average_chainig, over, under);
   qsort(&addresses[1], addresses[0], sizeof(uint64_t), compare_alt);
   return addresses;
 }
