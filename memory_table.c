@@ -36,7 +36,7 @@ void set_memory_cell(memory_table *table, memory_cell *cell) {
     table->memory[location] = cell;
   } else {
     memory_cell *previous = table->memory[location];
-    while (previous->next_cell) {
+    do { //needs to be executed at least once, else the cell in the list wont be checked
       if (cell->address == previous->address) {
         previous->content = cell->content;
         free(cell);
@@ -44,7 +44,7 @@ void set_memory_cell(memory_table *table, memory_cell *cell) {
                 // change
       }
       previous = previous->next_cell;
-    }
+    } while (previous->next_cell);
     previous->next_cell = cell;
   }
   table->initialised_cells++;
@@ -113,9 +113,9 @@ void kill_memory_table(memory_table *table) {
 }
 
 int compare(const void *a, const void *b) { return (*(int *)a - *(int *)b); }
-int compare_alt(const void *a, const void *b){
-  return (*(uint64_t*)a > *(uint64_t*)b) - (*(uint64_t*)a < *(uint64_t*)b);
-  }
+int compare_alt(const void *a, const void *b) {
+  return (*(uint64_t *)a > *(uint64_t *)b) - (*(uint64_t *)a < *(uint64_t *)b);
+}
 
 uint64_t *get_initialised_adresses(memory_table *table) {
   uint16_t deepness = 0;
@@ -129,7 +129,8 @@ uint64_t *get_initialised_adresses(memory_table *table) {
       malloc(sizeof(uint64_t) *
              (table->initialised_cells + 1)); // +1 for length of the list
   addresses[0] = table->initialised_cells;
-  uint32_t address_index = 1; //I do not expect more than 4.294.967.295 cells :)
+  uint32_t address_index = 1; // I do not expect more than 4.294.967.295 cells
+                              // :)
   for (size_t i = 0; i < TABLESIZE; i++) {
     deepness = 0;
     if (table->memory[i]) {
