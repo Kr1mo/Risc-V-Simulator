@@ -4,3 +4,4 @@ risc_v_sim
 states/*
 !states/basic.state
 !states/test_commands.state
+!states/repeated_writing.state
