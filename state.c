@@ -328,7 +328,7 @@ bool load_state(char *filename, state *s) {
     remove_whitespace(name_buffer);
     remove_whitespace(value_buffer);
 
-    uint32_t address = strtoul(name_buffer, NULL, 16);
+    uint64_t address = strtoul(name_buffer, NULL, 16);
     // if (address >= MEMORY_SIZE) {
     //   printf("ERROR: memory address %x out of current bounds of %d\n",
     //   address,
@@ -336,10 +336,10 @@ bool load_state(char *filename, state *s) {
     //   continue;
     // }
 
-    int8_t next_byte_offset = strlen(value_buffer);
+    int16_t next_byte_offset = strlen(value_buffer);
     if (next_byte_offset != 8 && next_byte_offset != 16 &&
         next_byte_offset != 4 && next_byte_offset != 2) {
-      printf("ERROR: Memory allocation at address %d neither 8, 16, 32 nor 64 "
+      printf("ERROR: Memory allocation at address %ld neither 8, 16, 32 nor 64 "
              "bit, "
              "but %d\n",
              address, next_byte_offset);

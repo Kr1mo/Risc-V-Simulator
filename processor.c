@@ -161,12 +161,12 @@ void execute_store(state *s, uint32_t command) {
   {
   case 0: // Byte
     uint8_t byte = (rs2_value << 56) >> 56;
-    set_word(s, address, byte);
+    set_byte(s, address, byte);
     break;
 
   case 1: // Halfword
     uint16_t halfword = (rs2_value << 48) >> 48;
-    set_word(s, address, halfword);
+    set_halfword(s, address, halfword);
     break;
 
   case 2: // Word

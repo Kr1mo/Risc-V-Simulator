@@ -121,7 +121,7 @@ uint64_t *get_initialised_adresses(memory_table *table) {
       malloc(sizeof(uint64_t) *
              (table->initialised_cells + 1)); // +1 for length of the list
   addresses[0] = table->initialised_cells;
-  uint16_t address_index = 1;
+  uint32_t address_index = 1; //I do not expect more than 4.294.967.295 cells :)
   for (size_t i = 0; i < TABLESIZE; i++) {
     if (table->memory[i]) {
       memory_cell *previous = table->memory[i];

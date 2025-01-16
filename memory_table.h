@@ -6,7 +6,7 @@
 #define MEMORY_TABLE
 
 #define TABLESIZE 4096
-// equal to e.g. ~500 commands and ~2KB Memory Space hashed with no overlap
+// equal to at most ~500 commands and ~2KB Memory Space hashed without overlap
 
 typedef struct memory_cell {
   uint64_t address;
@@ -16,7 +16,7 @@ typedef struct memory_cell {
 
 typedef struct memory_table {
   memory_cell *memory[TABLESIZE];
-  uint16_t initialised_cells;
+  uint64_t initialised_cells;
 } memory_table;
 
 uint32_t hash(int64_t address);
