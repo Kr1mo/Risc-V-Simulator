@@ -122,6 +122,9 @@ uint64_t *get_initialised_adresses(memory_table *table) {
   int64_t overall = 0;
   int64_t over = 0;
   int64_t under = 0;
+  int64_t average_chainig = table->initialised_cells / TABLESIZE;
+  int64_t tolerated_over = average_chainig + 5;
+  int64_t tolerated_under = average_chainig - 5;
   uint64_t *addresses =
       malloc(sizeof(uint64_t) *
              (table->initialised_cells + 1)); // +1 for length of the list
@@ -141,17 +144,17 @@ uint64_t *get_initialised_adresses(memory_table *table) {
         deepness++;
       }
     }
-    if (deepness>36)
+    if (deepness>=tolerated_over)
     {
-      printf("\x1b[31m""%d""\x1b[0m"",", deepness);
+      printf("\x1b[31m""%d""\x1b[0m"",", deepness); //in red
       over++;
-    }else if (deepness>27)
+    }else if (deepness>tolerated_under) //in tolerated margin
     {
-      printf("\x1b[32m""%d""\x1b[0m"",", deepness);
+      printf("\x1b[32m""%d""\x1b[0m"",", deepness); //in green
     }
     else
     {
-      printf("\x1b[34m""%d""\x1b[0m"",", deepness);
+      printf("\x1b[34m""%d""\x1b[0m"",", deepness); //in blue
       under++;
     }
     overall += deepness;
