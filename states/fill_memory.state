@@ -1,0 +1,10 @@
+REGISTERS:
+PC:0
+x1:ffff #how many halfword will be filled
+x2:8000 0000 0000 0000 #start of filling
+
+MEMORY:
+0: 00111023 #sh x2 0 x1
+4: fff08093 #addi x1 x1 -1
+8: 00210113 #addi x2 x2 2
+c: FE00DAE3 #bge x1 x0 2041 (= -12)

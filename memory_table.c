@@ -1,6 +1,7 @@
 #include "memory_table.h"
 #include <stdint.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 uint32_t
 hash(int64_t address) { // copied the one_at_a_time hashing algorithm,
@@ -117,23 +118,45 @@ int compare_alt(const void *a, const void *b){
   }
 
 uint64_t *get_initialised_adresses(memory_table *table) {
+  int8_t deepness = 0;
+  int64_t overall = 0;
+  int64_t over = 0;
+  int64_t under = 0;
   uint64_t *addresses =
       malloc(sizeof(uint64_t) *
              (table->initialised_cells + 1)); // +1 for length of the list
   addresses[0] = table->initialised_cells;
   uint32_t address_index = 1; //I do not expect more than 4.294.967.295 cells :)
   for (size_t i = 0; i < TABLESIZE; i++) {
+    deepness = 0;
     if (table->memory[i]) {
       memory_cell *previous = table->memory[i];
       addresses[address_index] = previous->address;
       address_index++;
+      deepness++;
       while (previous->next_cell) {
         previous = previous->next_cell;
         addresses[address_index] = previous->address;
         address_index++;
+        deepness++;
       }
     }
+    if (deepness>36)
+    {
+      printf("\x1b[31m""%d""\x1b[0m"",", deepness);
+      over++;
+    }else if (deepness>27)
+    {
+      printf("\x1b[32m""%d""\x1b[0m"",", deepness);
+    }
+    else
+    {
+      printf("\x1b[34m""%d""\x1b[0m"",", deepness);
+      under++;
+    }
+    overall += deepness;
   }
+printf("\nOverall counted %ld of %ld cells\nAt least 5 over expected: %ld, under: %ld\n", overall, table->initialised_cells, over, under);
   qsort(&addresses[1], addresses[0], sizeof(uint64_t), compare_alt);
   return addresses;
 }

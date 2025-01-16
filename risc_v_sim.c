@@ -7,7 +7,7 @@
 #include <unistd.h>
 
 int main(int argc, char **argv) {
-  char *source_state;
+  char *source_state = "states/fill_memory.state"; // Special for this branch: A standard state to use :)
   char *end_state = NULL;
   int n_cycles = 1;
   bool keep_going_until_not_initialised = false;
