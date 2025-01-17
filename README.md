@@ -31,7 +31,7 @@ it has the form of
     REGISTERS:
     (name):(value)
     ...
-
+    (exactly one empty line)
     MEMORY:
     (starting_adress):(memory_representation)
     ...
@@ -41,3 +41,10 @@ it has the form of
 
 (starting_adress) is an up to 64bit number in hex
 (memory_representation) is either a 8bit, 16bit, 32bit or 64 bit number in hex
+
+- It is advised that no line is longer than 80 characters.
+- Spaces can be placed as wished.
+- Empty lines exept the one defined are not possible.
+  This includes lines with only a comment.
+- Comments can be added to .state files by '#'.
+- Using ':' in comments is not possible.
