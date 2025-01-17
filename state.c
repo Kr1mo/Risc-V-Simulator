@@ -106,11 +106,11 @@ char *byte_to_hex(char *dest, uint8_t b) {
 
 bool pretty_print(state *s) {
   printf("Registers:\n");
-  printf("  PC:%ld\n", s->pc);
+  printf("  PC:%lx  #(%ld)\n", s->pc, s->pc);
   for (size_t i = 0; i < 32; i++) {
     if (s->regs_init[i]) {
       int64_t value_signed = s->regs_values[i];
-      printf("  x%ld:%ld\n", i, value_signed);
+      printf("  x%ld:%lx  #(%ld)\n", i, value_signed, value_signed);
     }
   }
 
