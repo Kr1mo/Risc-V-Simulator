@@ -1,7 +1,7 @@
 #include "memory_table.h"
 #include <stdint.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 uint32_t
 hash(int64_t address) { // copied the one_at_a_time hashing algorithm,
@@ -32,13 +32,14 @@ memory_cell *create_memory_cell(uint64_t address, uint8_t content) {
 }
 void set_memory_cell(memory_table *table, memory_cell *new_cell) {
   uint32_t location = hash(new_cell->address);
-  memory_cell* cell_in_table = table->memory[location];
+  memory_cell *cell_in_table = table->memory[location];
   if (!cell_in_table) {
     table->memory[location] = new_cell;
-  } else{
-    while (true) // Bad style, but found no limit that would actually trigger, so this feels 'honest'
+  } else {
+    while (true) // Bad style, but found no limit that would actually trigger,
+                 // so this feels 'honest'
     {
-      if (cell_in_table->address == new_cell->address) //address match
+      if (cell_in_table->address == new_cell->address) // address match
       {
         cell_in_table->content = new_cell->content;
         free(new_cell);
@@ -49,7 +50,8 @@ void set_memory_cell(memory_table *table, memory_cell *new_cell) {
         break; // needs to increment initialised_cells
       } else { // next_cell exists, so check next cell
         cell_in_table = cell_in_table->next_cell;
-        continue; // repeat loop (keyword not needed but helps me understand the flow)
+        continue; // repeat loop (keyword not needed but helps me understand the
+                  // flow)
       }
     }
   }
@@ -131,6 +133,8 @@ uint64_t *get_initialised_adresses(memory_table *table) {
   int64_t average_chainig = table->initialised_cells / TABLESIZE;
   int64_t tolerated_over = average_chainig + 5;
   int64_t tolerated_under = average_chainig - 5;
+  uint64_t lowest = average_chainig;
+  uint64_t highest = average_chainig;
   uint64_t *addresses =
       malloc(sizeof(uint64_t) *
              (table->initialised_cells + 1)); // +1 for length of the list
@@ -151,22 +155,41 @@ uint64_t *get_initialised_adresses(memory_table *table) {
         deepness++;
       }
     }
-    if (deepness>=tolerated_over)
-    {
-      printf("\x1b[31m""%d""\x1b[0m"",", deepness); //in red
+    if (deepness >= tolerated_over) {
+      printf("\x1b[31m"
+             "%d"
+             "\x1b[0m"
+             ",",
+             deepness); // in red
       over++;
-    }else if (deepness>tolerated_under) //in tolerated margin
+      if (deepness > highest) {
+        highest = deepness;
+      }
+
+    } else if (deepness > tolerated_under) // in tolerated margin
     {
-      printf("\x1b[32m""%d""\x1b[0m"",", deepness); //in green
-    }
-    else
-    {
-      printf("\x1b[34m""%d""\x1b[0m"",", deepness); //in blue
+      printf("\x1b[32m"
+             "%d"
+             "\x1b[0m"
+             ",",
+             deepness); // in green
+    } else {
+      printf("\x1b[34m"
+             "%d"
+             "\x1b[0m"
+             ",",
+             deepness); // in blue
       under++;
+      if (deepness < lowest) {
+        lowest = deepness;
+      }
     }
     overall += deepness;
   }
-printf("\nOverall counted %ld of %ld cells\nExpected: %ld, at least 5 over: %ld, under: %ld\n", overall, table->initialised_cells, average_chainig, over, under);
+  printf("\nOverall counted %ld of %ld cells\nExpected: %ld, at least 5 over: "
+         "%ld, under: %ld\nHighest: %ld, lowest: %ld\n",
+         overall, table->initialised_cells, average_chainig, over, under,
+         highest, lowest);
   qsort(&addresses[1], addresses[0], sizeof(uint64_t), compare_alt);
   return addresses;
 }

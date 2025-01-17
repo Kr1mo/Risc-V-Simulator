@@ -1,6 +1,6 @@
 REGISTERS:
 PC:0
-x1:19a2f #how many halfword will be filled
+x1:40000 #how many halfword will be filled
 x2:8000 0000 0000 0000 #start of filling
 
 MEMORY:
