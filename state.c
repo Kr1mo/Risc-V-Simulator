@@ -106,11 +106,11 @@ char *byte_to_hex(char *dest, uint8_t b) {
 
 bool pretty_print(state *s) {
   printf("Registers:\n");
-  printf("  PC:%ld\n", s->pc);
+  printf("  PC:%lx  #(%ld)\n", s->pc, s->pc);
   for (size_t i = 0; i < 32; i++) {
     if (s->regs_init[i]) {
       int64_t value_signed = s->regs_values[i];
-      printf("  x%ld:%ld\n", i, value_signed);
+      printf("  x%ld:%lx  #(%ld)\n", i, value_signed, value_signed);
     }
   }
 
@@ -193,13 +193,13 @@ state *create_new_state() {
 }
 
 void remove_whitespace(char *str) {
-  int8_t i = 0;
-  int8_t offset = 0;
+  int16_t i = 0;
+  int16_t offset = 0;
   char current_char = str[i];
 
   while (current_char != '\0' &&
          current_char !=
-             '\n') // raw form of values will have /n, must be removed
+             '\n') // raw form of values will have \n, must be removed
   {
     if (current_char != ' ') // this char contains information
     {
@@ -251,12 +251,14 @@ bool load_state(char *filename, state *s) {
 
   buffer_valid = fgets(buffer, sizeof(buffer), state_file);
   remove_comment(buffer);
+  remove_whitespace(buffer);
 
   while (buffer_valid && strncmp(buffer, "\n", 1)) {
     dp_pointer = strchr(buffer, ':');
     if (!dp_pointer) {
       buffer_valid = fgets(buffer, sizeof(buffer), state_file);
       remove_comment(buffer);
+      remove_whitespace(buffer);
       continue;
     }
 
@@ -265,9 +267,6 @@ bool load_state(char *filename, state *s) {
     name_buffer[name_length] = '\0';
 
     strcpy(value_buffer, dp_pointer + 1);
-
-    remove_whitespace(name_buffer);
-    remove_whitespace(value_buffer);
 
     switch (name_buffer[0]) {
     case 'P':
@@ -295,10 +294,12 @@ bool load_state(char *filename, state *s) {
     }
     buffer_valid = fgets(buffer, sizeof(buffer), state_file);
     remove_comment(buffer);
+    remove_whitespace(buffer);
   }
 
   buffer_valid = fgets(buffer, sizeof(buffer), state_file);
   remove_comment(buffer);
+  remove_whitespace(buffer);
   if (strncmp(buffer, "MEMORY:", 7) != 0) {
     printf("ERROR: state-file does not include 'MEMORY:'\n");
     return false;
@@ -306,12 +307,14 @@ bool load_state(char *filename, state *s) {
 
   buffer_valid = fgets(buffer, sizeof(buffer), state_file);
   remove_comment(buffer);
+  remove_whitespace(buffer);
 
   while (buffer_valid && strncmp(buffer, "\n", 1)) {
     dp_pointer = strchr(buffer, ':');
     if (!dp_pointer) {
       buffer_valid = fgets(buffer, sizeof(buffer), state_file);
       remove_comment(buffer);
+      remove_whitespace(buffer);
       continue;
     }
 
@@ -320,9 +323,6 @@ bool load_state(char *filename, state *s) {
     name_buffer[name_length] = '\0';
 
     strcpy(value_buffer, dp_pointer + 1);
-
-    remove_whitespace(name_buffer);
-    remove_whitespace(value_buffer);
 
     uint64_t address = strtoul(name_buffer, NULL, 16);
     // if (address >= MEMORY_SIZE) {
@@ -352,6 +352,7 @@ bool load_state(char *filename, state *s) {
 
     buffer_valid = fgets(buffer, sizeof(buffer), state_file);
     remove_comment(buffer);
+    remove_whitespace(buffer);
   }
 
   fclose(state_file);
