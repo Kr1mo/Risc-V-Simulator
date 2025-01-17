@@ -1,0 +1,9 @@
+REGISTERS:
+PC:4
+x1:0
+x2:fffff
+
+MEMORY:
+4:00108093 #addi x1 x1 0
+8:00102023 #sw x0 0 x1
+c:FE209CE3 #bne x1 x2 -8

@@ -30,22 +30,28 @@ memory_cell *create_memory_cell(uint64_t address, uint8_t content) {
   cell->next_cell = NULL;
   return cell;
 }
-void set_memory_cell(memory_table *table, memory_cell *cell) {
-  uint32_t location = hash(cell->address);
-  if (!table->memory[location]) {
-    table->memory[location] = cell;
-  } else {
-    memory_cell *previous = table->memory[location];
-    do { //needs to be executed at least once, else the cell in the list wont be checked
-      if (cell->address == previous->address) {
-        previous->content = cell->content;
-        free(cell);
-        return; // Don't increase initialised cells, number of cells did not
-                // change
+void set_memory_cell(memory_table *table, memory_cell *new_cell) {
+  uint32_t location = hash(new_cell->address);
+  memory_cell* cell_in_table = table->memory[location];
+  if (!cell_in_table) {
+    table->memory[location] = new_cell;
+  } else{
+    while (true) // Bad style, but found no limit that would actually trigger, so this feels 'honest'
+    {
+      if (cell_in_table->address == new_cell->address) //address match
+      {
+        cell_in_table->content = new_cell->content;
+        free(new_cell);
+        return; // do not increment initialised_cells as we freed the new cell
+      } else if (!cell_in_table->next_cell) // no next cell AND no address match
+      {
+        cell_in_table->next_cell = new_cell;
+        break; // needs to increment initialised_cells
+      } else { // next_cell exists, so check next cell
+        cell_in_table = cell_in_table->next_cell;
+        continue; // repeat loop (keyword not needed but helps me understand the flow)
       }
-      previous = previous->next_cell;
-    } while (previous->next_cell);
-    previous->next_cell = cell;
+    }
   }
   table->initialised_cells++;
 }
