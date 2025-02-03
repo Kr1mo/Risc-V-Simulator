@@ -201,7 +201,7 @@ void remove_whitespace(char *str) {
          current_char !=
              '\n') // raw form of values will have /n, must be removed
   {
-    if (current_char != ' ') // this char contains information
+    if (current_char != ' ' && current_char != '\t') // this char contains information
     {
       str[i - offset] = current_char; // move char to new position
     } else {

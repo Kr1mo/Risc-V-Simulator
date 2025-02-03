@@ -119,8 +119,8 @@ void execute_math_immediate(state *s, uint32_t command) {
     set_register(s, rd, rs1_value ^ immediate);
     break;
   case 5: // SRLI and SRAI
-    if ((immediate >> 6) != 0x1000000) {
-      printf("ERROR: immediate %ld unfitting for SRLI or SRAI", immediate);
+    if ((immediate >> 6) != 0 && immediate >> 6 != 0x10) {
+      printf("ERROR: immediate %ld unfitting for SRLI or SRAI\n", immediate);
     }
     uint8_t shift_size = immediate % 64;
     uint64_t shifted_value =
@@ -419,6 +419,7 @@ void execute_math_w_immediate(state *s, uint32_t command) {
     break;
   case 1:                                              // SLLW
     result = rs1_value_shortend << (immediate & 0x3F); // lowest 6bit
+    break;
   case 5:                                              // SRLW or SRAW
     uint8_t shift_size = immediate & 0x3F;
     uint32_t shifted_value =
