@@ -251,14 +251,12 @@ bool load_state(char *filename, state *s) {
 
   buffer_valid = fgets(buffer, sizeof(buffer), state_file);
   remove_comment(buffer);
-  remove_whitespace(buffer);
 
   while (buffer_valid && strncmp(buffer, "\n", 1)) {
     dp_pointer = strchr(buffer, ':');
     if (!dp_pointer) {
       buffer_valid = fgets(buffer, sizeof(buffer), state_file);
       remove_comment(buffer);
-      remove_whitespace(buffer);
       continue;
     }
 
@@ -267,6 +265,9 @@ bool load_state(char *filename, state *s) {
     name_buffer[name_length] = '\0';
 
     strcpy(value_buffer, dp_pointer + 1);
+
+  remove_whitespace(buffer);
+      remove_whitespace(buffer);
 
     switch (name_buffer[0]) {
     case 'P':
@@ -294,12 +295,10 @@ bool load_state(char *filename, state *s) {
     }
     buffer_valid = fgets(buffer, sizeof(buffer), state_file);
     remove_comment(buffer);
-    remove_whitespace(buffer);
   }
 
   buffer_valid = fgets(buffer, sizeof(buffer), state_file);
   remove_comment(buffer);
-  remove_whitespace(buffer);
   if (strncmp(buffer, "MEMORY:", 7) != 0) {
     printf("ERROR: state-file does not include 'MEMORY:'\n");
     return false;
@@ -307,14 +306,12 @@ bool load_state(char *filename, state *s) {
 
   buffer_valid = fgets(buffer, sizeof(buffer), state_file);
   remove_comment(buffer);
-  remove_whitespace(buffer);
 
   while (buffer_valid && strncmp(buffer, "\n", 1)) {
     dp_pointer = strchr(buffer, ':');
     if (!dp_pointer) {
       buffer_valid = fgets(buffer, sizeof(buffer), state_file);
       remove_comment(buffer);
-      remove_whitespace(buffer);
       continue;
     }
 
@@ -323,6 +320,9 @@ bool load_state(char *filename, state *s) {
     name_buffer[name_length] = '\0';
 
     strcpy(value_buffer, dp_pointer + 1);
+
+    remove_whitespace(name_buffer);
+    remove_whitespace(value_buffer);
 
     uint64_t address = strtoul(name_buffer, NULL, 16);
     // if (address >= MEMORY_SIZE) {
@@ -352,7 +352,6 @@ bool load_state(char *filename, state *s) {
 
     buffer_valid = fgets(buffer, sizeof(buffer), state_file);
     remove_comment(buffer);
-    remove_whitespace(buffer);
   }
 
   fclose(state_file);
