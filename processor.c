@@ -174,12 +174,12 @@ void execute_store(state *s, uint32_t command) {
     set_word(s, address, word);
     break;
 
-  case 4: // Doubleword
+  case 3: // Doubleword
     set_doubleword(s, address, rs2_value);
     break;
 
   default:
-    printf("ERROR: funct3 %u for math_store not intended\n", command & 0x7000);
+    printf("ERROR: funct3 %u for execute_store not intended\n", command & 0x7000);
   }
 
   next_pc(s);
@@ -329,7 +329,7 @@ void execute_jalr(
   if (rd) {
     set_register(s, rd, get_pc(s) + 4);
   }
-  set_pc(s, get_pc(s) + offset + rs1_value);
+  set_pc(s, offset + rs1_value);
 }
 
 void execute_lui(state *s, uint32_t command) {
