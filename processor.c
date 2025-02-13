@@ -179,7 +179,8 @@ void execute_store(state *s, uint32_t command) {
     break;
 
   default:
-    printf("ERROR: funct3 %u for execute_store not intended\n", command & 0x7000);
+    printf("ERROR: funct3 %u for execute_store not intended\n",
+           command & 0x7000);
   }
 
   next_pc(s);
@@ -420,7 +421,7 @@ void execute_math_w_immediate(state *s, uint32_t command) {
   case 1:                                              // SLLW
     result = rs1_value_shortend << (immediate & 0x3F); // lowest 6bit
     break;
-  case 5:                                              // SRLW or SRAW
+  case 5: // SRLW or SRAW
     uint8_t shift_size = immediate & 0x3F;
     uint32_t shifted_value =
         rs1_value_shortend >> shift_size; // SRL & SRA with positive rs1

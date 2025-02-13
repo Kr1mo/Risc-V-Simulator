@@ -12,7 +12,7 @@
 
 uint8_t get_byte(state *s, uint64_t address) {
   if (!is_address_initialised(s, address)) {
-    printf("ERROR: address %lx is not initialised", address);
+    printf("ERROR: address %lx is not initialised\n", address);
   }
 
   return get_memory_cell_content(s->memory, address);
@@ -20,11 +20,11 @@ uint8_t get_byte(state *s, uint64_t address) {
 uint16_t get_halfword(state *s, uint64_t address) {
   uint16_t res = 0;
   if (!is_address_initialised(s, address)) {
-    printf("ERROR: lower byte for halfword at address %lx is not initialised",
+    printf("ERROR: lower byte for halfword at address %lx is not initialised\n",
            address);
   }
   if (!is_address_initialised(s, address + 1)) {
-    printf("ERROR: higher byte for halfword address %lx is not initialised",
+    printf("ERROR: higher byte for halfword address %lx is not initialised\n",
            address + 1);
   }
   res += get_memory_cell_content(s->memory, address + 1);
@@ -36,7 +36,7 @@ uint32_t get_word(state *s, uint64_t address) {
   uint32_t res = 0;
   for (int8_t i = 3; i >= 0; i--) {
     if (!is_address_initialised(s, address + i)) {
-      printf("ERROR: %d. byte of word at address %lx is not initialised", i + 1,
+      printf("ERROR: %d. byte of word at address %lx is not initialised\n", i + 1,
              address);
     }
     res = res << 8;
@@ -48,7 +48,7 @@ uint64_t get_doubleword(state *s, uint64_t address) {
   uint64_t res = 0;
   for (int8_t i = 7; i >= 0; i--) {
     if (!is_address_initialised(s, address + i)) {
-      printf("ERROR: %d. byte of word at address %lx is not initialised", i + 1,
+      printf("ERROR: %d. byte of word at address %lx is not initialised\n", i + 1,
              address);
     }
     res = res << 8;
@@ -201,7 +201,8 @@ void remove_whitespace(char *str) {
          current_char !=
              '\n') // raw form of values will have \n, must be removed
   {
-    if (current_char != ' ' && current_char != '\t') // this char contains information
+    if (current_char != ' ' &&
+        current_char != '\t') // this char contains information
     {
       str[i - offset] = current_char; // move char to new position
     } else {
@@ -265,8 +266,8 @@ bool load_state(char *filename, state *s) {
     name_buffer[name_length] = '\0';
 
     strcpy(value_buffer, dp_pointer + 1);
-  remove_whitespace(buffer);
-      remove_whitespace(buffer);
+    remove_whitespace(buffer);
+    remove_whitespace(buffer);
 
     switch (name_buffer[0]) {
     case 'P':
