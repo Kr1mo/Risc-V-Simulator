@@ -107,7 +107,7 @@ int main(int argc, char **argv) {
   if (end_state) {
     kill_state(s, end_state);
   } else {
-    kill_state(s, "states/end.state");
+    kill_state(s, "end.state");
   }
   return 0;
 }
