@@ -36,8 +36,8 @@ uint32_t get_word(state *s, uint64_t address) {
   uint32_t res = 0;
   for (int8_t i = 3; i >= 0; i--) {
     if (!is_address_initialised(s, address + i)) {
-      printf("ERROR: %d. byte of word at address %lx is not initialised\n", i + 1,
-             address);
+      printf("ERROR: %d. byte of word at address %lx is not initialised\n",
+             i + 1, address);
     }
     res = res << 8;
     res += get_memory_cell_content(s->memory, address + i);
@@ -48,8 +48,8 @@ uint64_t get_doubleword(state *s, uint64_t address) {
   uint64_t res = 0;
   for (int8_t i = 7; i >= 0; i--) {
     if (!is_address_initialised(s, address + i)) {
-      printf("ERROR: %d. byte of word at address %lx is not initialised\n", i + 1,
-             address);
+      printf("ERROR: %d. byte of word at address %lx is not initialised\n",
+             i + 1, address);
     }
     res = res << 8;
     res += get_memory_cell_content(s->memory, address + i);

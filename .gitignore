@@ -5,3 +5,4 @@ states/*
 !states/basic.state
 !states/test_commands.state
 !states/repeated_writing.state
+*.out
