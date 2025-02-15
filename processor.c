@@ -300,7 +300,7 @@ void execute_jal(state *s, uint32_t command) {
   if (rd) {
     set_register(s, rd, s->pc + 4);
   }
-  set_pc(s, s->pc+ offset);
+  set_pc(s, s->pc + offset);
 }
 
 void execute_jalr(

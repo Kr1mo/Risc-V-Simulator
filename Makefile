@@ -1,4 +1,4 @@
-CFLAGS= -g -pg -Wall
+CFLAGS= -O2 -pg -Wall
 
 .PHONY: clean checkstyle format
 

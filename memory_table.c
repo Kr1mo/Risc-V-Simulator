@@ -6,18 +6,38 @@
 
 uint32_t
 hash(int64_t address) { // copied the one_at_a_time hashing algorithm,
-                        // seemed sufficient. Algorithm is sligthly
-                        // modified to fit my case
+                        // seemed sufficient. Algorithm is
+                        // modified to fit my case (eg removed while loop)
                         // https://en.wikipedia.org/wiki/Jenkins_hash_function
                         // 12.01.25
-  uint8_t i = 0;
   uint32_t hash = 0;
-  while (i < 8) {
-    hash += (address >> (i * 8)) % 256; // use one byte per iteration
-    hash += hash << 10;
-    hash ^= hash >> 6;
-    i++;
-  }
+  // This could have been a while loop but address size is fixed and hashing is
+  // the most time intensive operation, so I take every bit of performance I can
+  // get
+  hash += address % 256; // use one byte per iteration
+  hash += hash << 10;
+  hash ^= hash >> 6;
+  hash += (address >> (8)) % 256; // use one byte per iteration
+  hash += hash << 10;
+  hash ^= hash >> 6;
+  hash += (address >> (16)) % 256; // use one byte per iteration
+  hash += hash << 10;
+  hash ^= hash >> 6;
+  hash += (address >> (24)) % 256; // use one byte per iteration
+  hash += hash << 10;
+  hash ^= hash >> 6;
+  hash += (address >> (32)) % 256; // use one byte per iteration
+  hash += hash << 10;
+  hash ^= hash >> 6;
+  hash += (address >> (40)) % 256; // use one byte per iteration
+  hash += hash << 10;
+  hash ^= hash >> 6;
+  hash += (address >> (48)) % 256; // use one byte per iteration
+  hash += hash << 10;
+  hash ^= hash >> 6;
+  hash += (address >> (56)) % 256; // use one byte per iteration
+  hash += hash << 10;
+  hash ^= hash >> 6;
   hash += hash << 3;
   hash ^= hash >> 11;
   hash += hash << 15;

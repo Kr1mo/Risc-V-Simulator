@@ -90,8 +90,7 @@ int main(int argc, char **argv) {
     uint32_t hashed_third = hash(s->pc + 2);
     uint32_t hashed_fourth = hash(s->pc + 3);
 
-    if ((exists_address_in_table_at_location(s->memory, s->pc,
-                                             hashed_first) &&
+    if ((exists_address_in_table_at_location(s->memory, s->pc, hashed_first) &&
          exists_address_in_table_at_location(s->memory, s->pc + 1,
                                              hashed_second) &&
          exists_address_in_table_at_location(s->memory, s->pc + 2,
