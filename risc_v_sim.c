@@ -85,18 +85,18 @@ int main(int argc, char **argv) {
 
   size_t executed_cycles = 0;
   while (executed_cycles < n_cycles || keep_going_until_not_initialised) {
-    uint32_t hashed_first = hash(get_pc(s));
-    uint32_t hashed_second = hash(get_pc(s) + 1);
-    uint32_t hashed_third = hash(get_pc(s) + 2);
-    uint32_t hashed_fourth = hash(get_pc(s) + 3);
+    uint32_t hashed_first = hash(s->pc);
+    uint32_t hashed_second = hash(s->pc + 1);
+    uint32_t hashed_third = hash(s->pc + 2);
+    uint32_t hashed_fourth = hash(s->pc + 3);
 
-    if ((exists_address_in_table_at_location(s->memory, get_pc(s),
+    if ((exists_address_in_table_at_location(s->memory, s->pc,
                                              hashed_first) &&
-         exists_address_in_table_at_location(s->memory, get_pc(s) + 1,
+         exists_address_in_table_at_location(s->memory, s->pc + 1,
                                              hashed_second) &&
-         exists_address_in_table_at_location(s->memory, get_pc(s) + 2,
+         exists_address_in_table_at_location(s->memory, s->pc + 2,
                                              hashed_third) &&
-         exists_address_in_table_at_location(s->memory, get_pc(s) + 3,
+         exists_address_in_table_at_location(s->memory, s->pc + 3,
                                              hashed_fourth)) == false) {
       break;
     }
@@ -112,7 +112,7 @@ int main(int argc, char **argv) {
   if (keep_going_until_not_initialised) {
     printf("Ended execution after %ld cycles\n", executed_cycles);
   } else if (executed_cycles < n_cycles) {
-    printf("ERROR: Memory at PC %ld is not initialised\n", get_pc(s));
+    printf("ERROR: Memory at PC %ld is not initialised\n", s->pc);
   }
 
   if (print_last_state) {

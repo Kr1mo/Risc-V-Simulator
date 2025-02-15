@@ -19,7 +19,6 @@ uint16_t get_halfword(state *s, uint64_t address);
 uint32_t get_word(state *s, uint64_t address);
 uint64_t get_doubleword(state *s, uint64_t address);
 uint64_t get_register(state *s, uint8_t register_number);
-uint64_t get_pc(state *s);
 uint32_t get_next_command(state *s, uint32_t hashed_first,
                           uint32_t hashed_second, uint32_t hashed_third,
                           uint32_t hashed_fourth);

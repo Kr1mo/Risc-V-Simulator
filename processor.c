@@ -280,7 +280,7 @@ void execute_branch(state *s, uint32_t command) {
            command & 0x7000);
   }
   if (flag) {
-    set_pc(s, get_pc(s) + offset);
+    set_pc(s, s->pc + offset);
   } else {
     next_pc(s);
   }
@@ -298,9 +298,9 @@ void execute_jal(state *s, uint32_t command) {
   offset |= (command & 0x000FF000);       // offset[19:12] is at command[19:12]
   uint8_t rd = (command >> 7) % 32;
   if (rd) {
-    set_register(s, rd, get_pc(s) + 4);
+    set_register(s, rd, s->pc + 4);
   }
-  set_pc(s, get_pc(s) + offset);
+  set_pc(s, s->pc+ offset);
 }
 
 void execute_jalr(
@@ -317,7 +317,7 @@ void execute_jalr(
   uint64_t rs1_value = get_register(s, (command >> 15) % 32);
 
   if (rd) {
-    set_register(s, rd, get_pc(s) + 4);
+    set_register(s, rd, s->pc + 4);
   }
   set_pc(s, offset + rs1_value);
 }
@@ -344,7 +344,7 @@ void execute_auipc(state *s, uint32_t command) {
   }
   immediate |= (command & 0xFFFFF000); // immediate[31:12] is at command[31:12]
   uint8_t rd = (command >> 7) % 32;
-  set_register(s, rd, immediate + get_pc(s));
+  set_register(s, rd, immediate + s->pc);
   next_pc(s);
 }
 
