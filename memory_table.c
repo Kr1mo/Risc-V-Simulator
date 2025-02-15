@@ -2,6 +2,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+// Is called way to often, so hash will be available in the header
+
 uint32_t
 hash(int64_t address) { // copied the one_at_a_time hashing algorithm,
                         // seemed sufficient. Algorithm is sligthly
@@ -56,11 +58,61 @@ void set_memory_cell(memory_table *table, memory_cell *new_cell) {
   }
   table->initialised_cells++;
 }
+
+void set_memory_cell_at_location(memory_table *table, memory_cell *new_cell,
+                                 uint32_t location) {
+  memory_cell *cell_in_table = table->memory[location];
+  if (!cell_in_table) {
+    table->memory[location] = new_cell;
+  } else {
+    while (true) // Bad style, but found no limit that would actually trigger,
+                 // so this feels 'honest'
+    {
+      if (cell_in_table->address == new_cell->address) // address match
+      {
+        cell_in_table->content = new_cell->content;
+        free(new_cell);
+        return; // do not increment initialised_cells as we freed the new cell
+      } else if (!cell_in_table->next_cell) // no next cell AND no address match
+      {
+        cell_in_table->next_cell = new_cell;
+        break; // needs to increment initialised_cells
+      } else { // next_cell exists, so check next cell
+        cell_in_table = cell_in_table->next_cell;
+        continue; // repeat loop (keyword not needed but helps me understand the
+                  // flow)
+      }
+    }
+  }
+  table->initialised_cells++;
+}
+
 void set_memory(memory_table *table, uint64_t address, uint8_t content) {
   set_memory_cell(table, create_memory_cell(address, content));
 }
+
+void set_memory_at_location(memory_table *table, uint32_t location,
+                            uint8_t content) {
+  set_memory_cell_at_location(table, create_memory_cell(location, content),
+                              location);
+}
+
 bool exists_address_in_table(memory_table *table, uint64_t address) {
   uint32_t location = hash(address);
+  if (table->memory[location]) {
+    memory_cell *previous = table->memory[location];
+    while (previous) {
+      if (previous->address == address) {
+        return true;
+      }
+      previous = previous->next_cell;
+    }
+  }
+  return false;
+}
+
+bool exists_address_in_table_at_location(memory_table *table, uint64_t address,
+                                         uint32_t location) {
   if (table->memory[location]) {
     memory_cell *previous = table->memory[location];
     while (previous) {
@@ -78,6 +130,24 @@ uint8_t get_memory_cell_content(
     uint64_t address) { // TODO: Random values for non initialised adresses?
                         // Currently returns 0 for them
   uint32_t location = hash(address);
+  if (!table->memory[location]) {
+    return 0;
+  }
+  memory_cell *previous = table->memory[location];
+  while (previous->address != address) {
+    if (previous->next_cell) {
+      previous = previous->next_cell;
+    } else {
+      return 0;
+    }
+  }
+  return previous->content;
+}
+
+uint8_t get_memory_cell_content_at_location(
+    memory_table *table, uint64_t address,
+    uint32_t location) { // TODO: Random values for non initialised adresses?
+                         // Currently returns 0 for them
   if (!table->memory[location]) {
     return 0;
   }

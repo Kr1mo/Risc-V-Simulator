@@ -3,17 +3,6 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-bool is_next_command_valid_opcode(state *s) {
-  uint8_t code = get_next_command(s) & 0x7F;
-  uint8_t opcodes[] = {OP_CODES_RV32I, OP_CODES_RV64I};
-  for (uint8_t i = 0; i < sizeof(opcodes); i++) {
-    if (code == opcodes[i]) {
-      return true;
-    }
-  }
-  return false;
-}
-
 void execute_math_reg_only(state *s, uint32_t command) {
   uint8_t rd = (command >> 7) % 32;
   uint64_t rs1_value = get_register(s, (command >> 15) % 32);
@@ -447,8 +436,11 @@ void execute_math_w_immediate(state *s, uint32_t command) {
   next_pc(s);
 }
 
-void execute_next_command(state *s) {
-  uint32_t command = get_next_command(s);
+void execute_next_command(state *s, uint32_t hashed_first,
+                          uint32_t hashed_second, uint32_t hashed_third,
+                          uint32_t hashed_fourth) {
+  uint32_t command = get_next_command(s, hashed_first, hashed_second,
+                                      hashed_third, hashed_fourth);
   switch (command & 0x7F) // sort by opcode
   {
   case 51: // 0110011b Math register only
@@ -496,8 +488,10 @@ void execute_next_command(state *s) {
     break;
 
   default:
-    printf("ERROR: opcode %u is unknown or not implemented yet\n",
+    printf("ERROR: opcode %u is unknown or not implemented yet, PC was "
+           "increased.\n",
            command & 0x7F);
+    next_pc(s);
     break;
   }
 }

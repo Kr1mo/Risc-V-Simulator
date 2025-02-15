@@ -23,13 +23,22 @@ uint32_t hash(int64_t address);
 
 memory_cell *create_memory_cell(uint64_t address, uint8_t content);
 void set_memory_cell(memory_table *table, memory_cell *cell);
+void set_memory_at_location(memory_table *table, uint32_t location,
+                            uint8_t content);
 void set_memory(memory_table *table, uint64_t address, uint8_t content);
+void set_memory_at_location(memory_table *table, uint32_t location,
+                            uint8_t content);
 bool exists_address_in_table(memory_table *table, uint64_t address);
+bool exists_address_in_table_at_location(memory_table *table, uint64_t address,
+                                         uint32_t location);
 
 uint8_t get_memory_cell_content(
     memory_table *table,
     uint64_t address); // TODO: Random values for non initialised adresses?
                        // Currently returns 0 for them
+uint8_t get_memory_cell_content_at_location(memory_table *table,
+                                            uint64_t address,
+                                            uint32_t location);
 
 void kill_memory_cell_recursive(
     memory_cell

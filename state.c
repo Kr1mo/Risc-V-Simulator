@@ -11,7 +11,8 @@
 #define VALUE_BUFFER_SIZE 32 // At least 22!
 
 uint8_t get_byte(state *s, uint64_t address) {
-  if (!is_address_initialised(s, address)) {
+  uint32_t hashed_address = hash(address);
+  if (!is_address_initialised(s, address, hashed_address)) {
     printf("ERROR: address %lx is not initialised\n", address);
   }
 
@@ -19,40 +20,81 @@ uint8_t get_byte(state *s, uint64_t address) {
 }
 uint16_t get_halfword(state *s, uint64_t address) {
   uint16_t res = 0;
-  if (!is_address_initialised(s, address)) {
+  uint32_t hashed_address = hash(address);
+  uint32_t hashed_address_plus_one = hash(address + 1);
+  if (!is_address_initialised(s, address, hashed_address)) {
     printf("ERROR: lower byte for halfword at address %lx is not initialised\n",
            address);
   }
-  if (!is_address_initialised(s, address + 1)) {
+  if (!is_address_initialised(s, address + 1, hashed_address_plus_one)) {
     printf("ERROR: higher byte for halfword address %lx is not initialised\n",
            address + 1);
   }
-  res += get_memory_cell_content(s->memory, address + 1);
+  res += get_memory_cell_content_at_location(s->memory, address + 1,
+                                             hashed_address_plus_one);
   res = res << 8;
-  res += get_memory_cell_content(s->memory, address);
+  res +=
+      get_memory_cell_content_at_location(s->memory, address, hashed_address);
   return res;
 }
 uint32_t get_word(state *s, uint64_t address) {
   uint32_t res = 0;
   for (int8_t i = 3; i >= 0; i--) {
-    if (!is_address_initialised(s, address + i)) {
+    uint32_t hashed_address = hash(address + i);
+    if (!is_address_initialised(s, address + i, hashed_address)) {
       printf("ERROR: %d. byte of word at address %lx is not initialised\n",
              i + 1, address);
     }
     res = res << 8;
-    res += get_memory_cell_content(s->memory, address + i);
+    res += get_memory_cell_content_at_location(s->memory, address + i,
+                                               hashed_address);
+  }
+  return res;
+}
+uint32_t get_word_at_locations(state *s, uint64_t address,
+                               uint32_t hashed_first, uint32_t hashed_second,
+                               uint32_t hashed_third, uint32_t hashed_fourth) {
+  uint32_t res = 0;
+  for (int8_t i = 3; i >= 0; i--) {
+    uint32_t hashed_address = 0;
+    switch (i) {
+    case 0:
+      hashed_address = hashed_first;
+      break;
+    case 1:
+      hashed_address = hashed_second;
+      break;
+    case 2:
+      hashed_address = hashed_third;
+      break;
+    case 3:
+      hashed_address = hashed_fourth;
+      break;
+    default:
+      printf("ERROR: i is %d, but should be 0-3\n", i);
+      break;
+    }
+    if (!is_address_initialised(s, address + i, hashed_address)) {
+      printf("ERROR: %d. byte of word at address %lx is not initialised\n",
+             i + 1, address);
+    }
+    res = res << 8;
+    res += get_memory_cell_content_at_location(s->memory, address + i,
+                                               hashed_address);
   }
   return res;
 }
 uint64_t get_doubleword(state *s, uint64_t address) {
   uint64_t res = 0;
   for (int8_t i = 7; i >= 0; i--) {
-    if (!is_address_initialised(s, address + i)) {
+    uint32_t hashed_address = hash(address + i);
+    if (!is_address_initialised(s, address + i, hashed_address)) {
       printf("ERROR: %d. byte of word at address %lx is not initialised\n",
              i + 1, address);
     }
     res = res << 8;
-    res += get_memory_cell_content(s->memory, address + i);
+    res += get_memory_cell_content_at_location(s->memory, address + i,
+                                               hashed_address);
   }
   return res;
 }
@@ -64,7 +106,12 @@ uint64_t get_register(state *s, uint8_t register_number) {
   return s->regs_values[register_number];
 }
 uint64_t get_pc(state *s) { return s->pc; }
-uint32_t get_next_command(state *s) { return get_word(s, s->pc); }
+uint32_t get_next_command(state *s, uint32_t hashed_first,
+                          uint32_t hashed_second, uint32_t hashed_third,
+                          uint32_t hashed_fourth) {
+  return get_word_at_locations(s, s->pc, hashed_first, hashed_second,
+                               hashed_third, hashed_fourth);
+}
 
 void set_byte(state *s, uint64_t address, uint8_t value) {
   set_memory(s->memory, address, value);
@@ -164,17 +211,13 @@ bool pretty_print(state *s) {
   return true;
 }
 
-bool is_address_initialised(state *s, uint64_t address) {
-  return exists_address_in_table(s->memory, address);
+bool is_address_initialised(state *s, uint64_t address,
+                            uint32_t hashed_address) {
+  return exists_address_in_table_at_location(s->memory, address,
+                                             hashed_address);
 }
 bool is_register_initialised(state *s, uint8_t register_number) {
   return s->regs_init[register_number];
-}
-bool is_next_command_initialised(state *s) {
-  return is_address_initialised(s, s->pc) &&
-         is_address_initialised(s, s->pc + 1) &&
-         is_address_initialised(s, s->pc + 2) &&
-         is_address_initialised(s, s->pc + 3);
 }
 
 state *create_new_state() {

@@ -84,9 +84,25 @@ int main(int argc, char **argv) {
   }
 
   size_t executed_cycles = 0;
-  while (is_next_command_initialised(s) &&
-         (executed_cycles < n_cycles || keep_going_until_not_initialised)) {
-    execute_next_command(s);
+  while (executed_cycles < n_cycles || keep_going_until_not_initialised) {
+    uint32_t hashed_first = hash(get_pc(s));
+    uint32_t hashed_second = hash(get_pc(s) + 1);
+    uint32_t hashed_third = hash(get_pc(s) + 2);
+    uint32_t hashed_fourth = hash(get_pc(s) + 3);
+
+    if ((exists_address_in_table_at_location(s->memory, get_pc(s),
+                                             hashed_first) &&
+         exists_address_in_table_at_location(s->memory, get_pc(s) + 1,
+                                             hashed_second) &&
+         exists_address_in_table_at_location(s->memory, get_pc(s) + 2,
+                                             hashed_third) &&
+         exists_address_in_table_at_location(s->memory, get_pc(s) + 3,
+                                             hashed_fourth)) == false) {
+      break;
+    }
+
+    execute_next_command(s, hashed_first, hashed_second, hashed_third,
+                         hashed_fourth);
     if (debug) {
       printf("\n--------------------\n\n");
       pretty_print(s);

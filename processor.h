@@ -12,6 +12,8 @@
 
 bool is_next_command_valid_opcode(state *s);
 
-void execute_next_command(state *s);
+void execute_next_command(state *s, uint32_t hashed_first,
+                          uint32_t hashed_second, uint32_t hashed_third,
+                          uint32_t hashed_fourth);
 
 #endif // PROCESSOR
