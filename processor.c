@@ -365,9 +365,12 @@ void execute_math_w(state *s, uint32_t command) {
       result = rs1_value_shortend + rs2_value_shortend;
     }
     break;
+
   case 1:                                                       // SLLW
     result = rs1_value_shortend << (rs2_value_shortend & 0x3F); // lowest 6bit
-  case 5:                                                       // SRLW or SRAW
+    break;
+
+  case 5: // SRLW or SRAW
     uint8_t shift_size = rs2_value_shortend & 0x3F;
     uint32_t shifted_value =
         rs1_value_shortend >> shift_size; // SRL & SRA with positive rs1
@@ -380,6 +383,7 @@ void execute_math_w(state *s, uint32_t command) {
     }
     result = shifted_value;
     break;
+
   default:
     printf("ERROR: funct3 %u for math_w not yet implemented or not defined\n",
            command & 0x7000);
