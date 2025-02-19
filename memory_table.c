@@ -133,7 +133,7 @@ uint64_t *get_initialised_adresses(memory_table *table) {
   int64_t average_chainig = table->initialised_cells / TABLESIZE;
   uint16_t ten_percent = average_chainig / 10;
   int64_t tolerated_over = average_chainig + ten_percent;
-  int64_t tolerated_under = average_chainig - ten_percent;
+  int64_t tolerated_under = average_chainig - ten_percent +1;
   uint64_t lowest = average_chainig;
   uint64_t highest = average_chainig;
   uint64_t *addresses =
