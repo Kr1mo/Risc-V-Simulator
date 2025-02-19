@@ -3,3 +3,4 @@
 risc_v_sim
 states/*
 !states/fill_memory.state
+*.out
