@@ -45,7 +45,7 @@ void execute_math_reg_only(state *s, uint32_t command) {
     uint64_t shifted_value =
         rs1_value >> shift_size; // SRL & SRA with positive rs1
     if ((command & 0x40000000) &&
-        (rs1_value & 0x8000000000000000) && rs2_value != 0) { // SRA with negative rs1
+        (rs1_value & 0x8000000000000000) && shift_size != 0) { // SRA with negative rs1
       uint64_t mask =
           0xffffffffffffffff
           << (64 - shift_size); // generating a mask for sign extension
@@ -115,7 +115,7 @@ void execute_math_immediate(state *s, uint32_t command) {
     uint64_t shifted_value =
         rs1_value >> shift_size; // SRL & SRA with positive rs1
     if ((command & 0x40000000) &&
-        (rs1_value & 0x8000000000000000)) { // SRAI with negative rs1
+        (rs1_value & 0x8000000000000000) && shift_size != 0) { // SRAI with negative rs1
       uint64_t mask =
           0xffffffffffffffff
           << (64 - shift_size); // generating a mask for sign extension
@@ -375,7 +375,7 @@ void execute_math_w(state *s, uint32_t command) {
     uint32_t shifted_value =
         rs1_value_shortend >> shift_size; // SRL & SRA with positive rs1
     if ((command & 0x40000000) &&
-        (rs1_value_shortend & 0x80000000)) { // SRA with negative rs1
+        (rs1_value_shortend & 0x80000000) && shift_size != 0) { // SRA with negative rs1
       uint64_t mask = 0xffffffff
                       << (32 -
                           shift_size); // generating a mask for sign extension
@@ -419,7 +419,7 @@ void execute_math_w_immediate(state *s, uint32_t command) {
     uint32_t shifted_value =
         rs1_value_shortend >> shift_size; // SRL & SRA with positive rs1
     if ((command & 0x40000000) &&
-        (rs1_value_shortend & 0x80000000)) { // SRA with negative rs1
+        (rs1_value_shortend & 0x80000000) && shift_size != 0) { // SRA with negative rs1
       uint64_t mask = 0xffffffff
                       << (32 -
                           shift_size); // generating a mask for sign extension
