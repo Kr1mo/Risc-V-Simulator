@@ -367,11 +367,11 @@ void execute_math_w(state *s, uint32_t command) {
     break;
 
   case 1:                                                       // SLLW
-    result = rs1_value_shortend << (rs2_value_shortend & 0x3F); // lowest 6bit
+    result = rs1_value_shortend << (rs2_value_shortend & 0x1F); // lowest 6bit
     break;
 
   case 5: // SRLW or SRAW
-    uint8_t shift_size = rs2_value_shortend & 0x3F;
+    uint8_t shift_size = rs2_value_shortend & 0x1F;
     uint32_t shifted_value =
         rs1_value_shortend >> shift_size; // SRL & SRA with positive rs1
     if ((command & 0x40000000) &&
