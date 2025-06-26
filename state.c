@@ -131,8 +131,10 @@ void set_doubleword(state *s, uint64_t address, uint64_t value) {
   }
 }
 void set_register(state *s, uint8_t register_number, uint64_t value) {
-  s->regs_values[register_number] = value;
-  s->regs_init[register_number] = true;
+  if (register_number) {
+    s->regs_values[register_number] = value;
+    s->regs_init[register_number] = true;
+  }
 }
 void set_pc(state *s, uint64_t value) { s->pc = value; }
 void next_pc(state *s) { s->pc += 4; }

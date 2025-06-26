@@ -411,11 +411,11 @@ void execute_math_w_immediate(state *s, uint32_t command) {
   case 0: // ADDIW
     result = rs1_value_shortend + immediate;
     break;
-  case 1:                                              // SLLW
-    result = rs1_value_shortend << (immediate & 0x3F); // lowest 6bit
+  case 1:                                              // SLLIW
+    result = rs1_value_shortend << (immediate & 0x1F); // lowest 5bit
     break;
   case 5: // SRLW or SRAW
-    uint8_t shift_size = immediate & 0x3F;
+    uint8_t shift_size = immediate & 0x1F;
     uint32_t shifted_value =
         rs1_value_shortend >> shift_size; // SRL & SRA with positive rs1
     if ((command & 0x40000000) &&
