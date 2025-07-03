@@ -319,7 +319,7 @@ void execute_jalr(
   if (rd) {
     set_register(s, rd, s->pc + 4);
   }
-  set_pc(s, offset + rs1_value);
+  set_pc(s, (offset + rs1_value) & 0xFFFFFFFFFFFFFFFE); // set lowest bit to 0
 }
 
 void execute_lui(state *s, uint32_t command) {
